@@ -1,12 +1,15 @@
-import React from 'react';
-import { Route, Routes } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Admin from './pages/Admin';
-import ProtectedRoute from './components/ProtectedRoute';
+import React from "react";
+import { Route, Routes } from "react-router-dom";
 
-const App: React.FC = () => {
+import { AuthProvider } from "./context/AuthContext";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Admin from "./pages/Admin";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Registration from "./components/Registeration";
+import Loader from "./components/loader";
+
+const App = () => {
   return (
     <AuthProvider>
       <Routes>
@@ -20,6 +23,8 @@ const App: React.FC = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/search" element={<Registration />} />  {/* ✅ Search Page */}
+        <Route path="/result/:rollNumber" element={<Loader />} />  {/* ✅ Result Page */}
       </Routes>
     </AuthProvider>
   );
