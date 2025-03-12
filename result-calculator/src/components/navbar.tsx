@@ -5,12 +5,11 @@ import { useAuth } from '../context/AuthContext';
 const Navbar = ({ toggleTheme, isDarkMode }: { toggleTheme: () => void; isDarkMode: boolean }) => {
   return (
     <div className="h-[10vh] w-full flex justify-between bg-gray-200 dark:bg-gray-900 transition-colors duration-300">
-      <div className="h-full md:w-3/12 w-[45%] flex items-center justify-center text-2xl md:text-4xl font-bold font-mono text-gray-800 dark:text-white">
-        Result <br />
-        Management
+      <div className="h-full ml-3 md:ml-0 md:w-3/12 w-[45%] flex items-center justify-center text-2xl md:text-4xl font-bold font-mono text-gray-800 dark:text-white">
+        Result Management
       </div>
       <div className="h-full md:w-3/12 w-[50%] flex items-center justify-center md:text-xl text-sm md:font-bold font-mono">
-        <Link to='/login' className="hover:text-amber-700 delay-75 text-gray-400 dark:text-gray-300">
+        <Link to='/login' className="hover:text-black delay-75 text-gray-400 dark:text-gray-300">
             Admin_Login
         </Link>
 
