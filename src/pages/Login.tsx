@@ -1,7 +1,6 @@
 import React, { FormEvent, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.tsx';
-import Admin from './Admin.tsx';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>('');

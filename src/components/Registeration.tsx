@@ -1,5 +1,5 @@
-import React, { FormEvent, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { FormEvent, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { app } from "../firebase";
 
@@ -21,7 +21,6 @@ export default function Registration() {
         const docSnap = await getDoc(docRef);
 
         if(docSnap.exists()) {
-            const resultData = docSnap.data();
             navigate(`/result/${rollNumber}`);
         } else {
             seterror("Roll number not found. Please enter a valid one.");

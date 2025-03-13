@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { app } from "../firebase";
@@ -11,7 +11,6 @@ export default function Result() {
   const [studentData, setStudentData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const rollNumberSafe = rollNumber ?? "";
 
   useEffect(() => {
     const fetchResult = async () => {
