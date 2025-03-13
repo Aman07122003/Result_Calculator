@@ -24,7 +24,7 @@ const Login: React.FC = () => {
 
   return (
     <div className='w-full h-[100vh] bg-gray-200 flex justify-center items-center'>
-        <div className='h-3/6 w-3/12 flex items-center justify-center'>
+        <div className='h-[50%] md:w-[40%] w-[70%] flex items-center justify-center'>
              <div className='h-[90%] w-[90%]'>
                <h1 className='text-5xl font-bold'>Admin Login</h1>
                     {error ? <p className='p-3 bg-red-400 my-2'>{error}</p> : null}
