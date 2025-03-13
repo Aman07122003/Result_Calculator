@@ -11,6 +11,7 @@ export default function Result() {
   const [studentData, setStudentData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const rollNumberSafe = rollNumber ?? "";
 
   useEffect(() => {
     const fetchResult = async () => {
@@ -38,48 +39,50 @@ export default function Result() {
 
   return (
     <div className="h-screen w-full bg-gray-200 flex items-center justify-center">
-        <div className="h-[95%] flex items-center justify-center md:w-[60%] bg-white rounded-2xl shadow-2xl">
-            <div className="h-11/12 w-11/12" >
-                <div className="h-[5%] w-full flex flex-col items-center justify-center">
-                    <h2 className="text-5xl font-extrabold text-gray-900">Calculation Result</h2>
+        <div className="h-[95%] flex items-center justify-center w-[92%] md:w-[55%] bg-white rounded-2xl shadow-2xl">
+            <div className="h-[90%] w-10/12" >
+                <div className="md:h-[20px] h-[15px] w-full flex items-center justify-center">
+                    <h2 className="md:text-4xl text-2xl font-extrabold text-gray-900">Calculation Result</h2>
                 </div>
-                <div className="flex text-2xl mt-1 font-bold w-full items-center h-[7%]">Personal Information</div>
-                <div className="w-full border-[1px] border-gray-200"></div>
-                <div className="h-[14%] mt-1 flex items-center justify-between w-full">
-                    <div className="h-[80%] w-[30%] bg-[#e2f0fd] items-center flex justify-center rounded-2xl">
-                        <div className="h-[80%] w-[80%]">
-                            <div className="h-50% w-full text-2xl font-bold text-blue-800">Name</div>
-                            <div className="h-50% mt-1.5 text-xl w-full font-sans text-blue-800">{studentData.name}</div>
+                <div className="flex md:text-lg md:mt-7 mt-4 font-semibold w-full items-center h-[6%]">Personal Information</div>
+                <div className="w-full border-[1px] border-gray-100"></div>
+                <div className="md:h-[12%] md:mt-1 md:flex items-center justify-between w-full h-[18%] mt-3 md:flex-row flex-col gap-y-2 md:gap-y-0">
+                    <div className="md:h-[70%] h-[25%] md:w-[30%] bg-[#e2f0fd] items-center flex justify-center rounded-2xl">
+                        <div className="md:h-[90%] h-[80%] w-[80%] md:flex-col flex  gap-x-1">
+                            <div className="md:h-[50%] md:w-full md:text-lg text-sm font-bold flex items-center text-blue-800">Name </div>
+                            <div className="md:h-[50%] md:w-full flex items-center text-sm  w-full font-sans text-blue-800"> {studentData.name}</div>
                         </div>
                     </div>
-                    <div className="h-[80%] w-[30%] bg-[#11f01134] items-center flex justify-center rounded-2xl">
-                        <div className="h-[80%] w-[80%]">
-                            <div className="h-50% w-full text-2xl font-bold text-green-800">Roll Number</div>
-                            <div className="h-50% mt-1.5 text-xl w-full font-sans text-green-800">{rollNumber}</div>
+                    <div className="md:h-[70%] md:w-[30%] h-[25%] md:mt-0 mt-2 bg-[#11f01134] items-center flex justify-center rounded-2xl">
+                        <div className="md:h-[90%] w-[80%] flex md:flex-col items-center gap-x-1 md:gap-0">
+                            <div className="h-50% md:w-full md:text-lg font-bold text-sm text-green-800">Roll Number</div>
+                            <div className="h-50% md:w-full text-sm font-sans text-green-800"> {rollNumber}</div>
                         </div>
                     </div>
-                    <div className="h-[80%] w-[30%] bg-[#ffff0060] items-center flex justify-center rounded-2xl">
-                        <div className="h-[80%] w-[80%]">
-                            <div className="h-50% w-full text-2xl font-bold text-amber-800">Roll Number</div>
-                            <div className="h-50% mt-1.5 text-xl w-full font-sans text-amber-800">{studentData.semester}</div>
+                    <div className="md:h-[70%] md:w-[30%] h-[25%] mt-2 bg-[#ffff0060] items-center flex justify-center rounded-2xl">
+                        <div className="md:h-[90%] w-[80%] flex md:flex-col items-center gap-x-1 md:gap-0">
+                            <div className="h-50% md:w-full md:text-lg text-sm font-bold text-amber-800">Semester</div>
+                            <div className="h-50% md:w-full text-sm font-sans text-amber-800"> {studentData.semester}</div>
                         </div>
                     </div>
                 </div>
-                <div className="h-[60%] w-full bg-amber-300 mt-1">
-                    <Grades studentData={studentData} />
+                <div className="w-full">
+                  <div className="h-[30px] md:mt-2.5 md:text-lg font-semibold"> Detailed Subject Grades</div>
+                  <div className="w-full md:mt-2 border-[1px] border-gray-100"></div>
+                  <Grades studentData={studentData} rollNumber={rollNumber ?? ""} />
                 </div>
-                <div className="h-[10%] w-full">
-                    <div className="text-2xl font-bold mt-2">Result Summary</div>
-                    <div className="w-full border border-gray-200 mt-3 "></div>
-                    <div className="h-11/12 w-full flex
-                    items-center justify-between">
-                        <div className="h-8/12 rounded-2xl bg-[#11f01134] flex items-center w-5/12">
-                           <div className="h-7/12 ml-5 font-bold text-green-800 text-2xl w-full">
+                <div className="h-[10%] w-full md:mt-5 mt-3">
+                    <div className="md:text-lg font-semibold md:mt-2">Result Summary</div>
+                    <div className="w-full border border-gray-200 md:mt-2 mt-1"></div>
+                    <div className="h-11/12 w-full flex 
+                    items-center justify-between md:mt-2">
+                        <div className="md:h-8/12 h-6/12 rounded-2xl bg-[#11f01134] flex items-center w-5/12">
+                           <div className="md:h-7/12 ml-5 font-bold text-green-800 md:text-lg  w-full">
                             Rank :- {}
                            </div>
                         </div>
-                        <div className="h-8/12 rounded-2xl bg-[#ffff0060] flex items-center w-5/12">
-                           <div className="h-7/12 ml-5 font-bold text-amber-800 text-2xl w-full">
+                        <div className="md:h-8/12 h-6/12 rounded-2xl bg-[#ffff0060] flex items-center w-5/12">
+                           <div className="md:h-7/12 md:ml-5 ml-4 font-bold text-amber-800 md:text-lg text-sm w-full">
                             CGPA :-  <span className="font-light">{studentData.cgpa}</span>
                            </div>
                         </div>
