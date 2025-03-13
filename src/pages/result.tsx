@@ -37,15 +37,15 @@ export default function Result() {
   if (error) return <p className="text-center text-red-600">{error}</p>;
 
   return (
-    <div className="h-screen w-full bg-gray-200 flex items-center justify-center">
-        <div className="h-[95%] flex items-center justify-center w-[92%] md:w-[55%] bg-white rounded-2xl shadow-2xl">
-            <div className="h-[90%] w-10/12" >
-                <div className="md:h-[20px] h-[15px] w-full flex items-center justify-center">
+    <div className="md:h-screen h-[880px] w-full bg-gray-200 flex items-center justify-center">
+        <div className="h-[97%] flex items-center justify-center w-[95%] md:w-[55%] bg-white rounded-2xl shadow-2xl">
+            <div className="h-[92%] w-[91%]" >
+                <div className="md:h-[20px] h-[5%] w-full flex items-center justify-center">
                     <h2 className="md:text-4xl text-2xl font-extrabold text-gray-900">Calculation Result</h2>
                 </div>
-                <div className="flex md:text-lg md:mt-7 mt-4 font-semibold w-full items-center h-[6%]">Personal Information</div>
+                <div className="flex md:text-lg md:mt-7 mt-4 font-semibold w-full items-center h-[5%]">Personal Information</div>
                 <div className="w-full border-[1px] border-gray-100"></div>
-                <div className="md:h-[12%] md:mt-1 md:flex items-center justify-between w-full h-[18%] mt-3 md:flex-row flex-col gap-y-2 md:gap-y-0">
+                <div className="md:h-[12%] md:mt-1 md:flex items-center justify-between w-full h-[20%] mt-3 md:flex-row flex-col gap-y-2 md:gap-y-0">
                     <div className="md:h-[70%] h-[25%] md:w-[30%] bg-[#e2f0fd] items-center flex justify-center rounded-2xl">
                         <div className="md:h-[90%] h-[80%] w-[80%] md:flex-col flex  gap-x-1">
                             <div className="md:h-[50%] md:w-full md:text-lg text-sm font-bold flex items-center text-blue-800">Name </div>
@@ -65,12 +65,12 @@ export default function Result() {
                         </div>
                     </div>
                 </div>
-                <div className="w-full">
+                <div className="w-full h-[55%]">
                   <div className="h-[30px] md:mt-2.5 md:text-lg font-semibold"> Detailed Subject Grades</div>
                   <div className="w-full md:mt-2 border-[1px] border-gray-100"></div>
                   <Grades studentData={studentData} rollNumber={rollNumber ?? ""} />
                 </div>
-                <div className="h-[10%] w-full md:mt-5 mt-3">
+                <div className="h-[10%] w-full md:mt-5 mt-3 ">
                     <div className="md:text-lg font-semibold md:mt-2">Result Summary</div>
                     <div className="w-full border border-gray-200 md:mt-2 mt-1"></div>
                     <div className="h-11/12 w-full flex 
