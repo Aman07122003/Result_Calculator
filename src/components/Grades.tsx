@@ -21,9 +21,9 @@ console.log(student);
 
   return (
     <div className="overflow-x-auto md:mt-5 mt-3">
-      <table className="min-w-full bg-white border border-gray-300 md:text-[13px] text-[12px] ">
+      <table className="min-w-full bg-white border border-gray-300 md:text-[18px] text-[12px] ">
         <thead className="bg-gray-100">
-          <tr className="text-sm">
+          <tr className="text-sm md:text-[19px]">
             <th className="py-1 px-3 border-b">Subject Code</th>
             <th className="py-1 px-4 border-b">Subject Name</th>
             <th className="py-1 px-2 border-b">Sessional Marks</th>
