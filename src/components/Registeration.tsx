@@ -47,7 +47,7 @@ return (
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-sm">
           <form onSubmit={handleSubmit} className="w-full flex flex-col py-4">
             <div>
-              <label htmlFor="rollNumber" className="block text-sm/6 font-medium text-gray-900">
+              <label htmlFor="rollNumber" className="block text-sm/6 md:text-[17px] font-medium text-gray-900">
                 Roll Number
               </label>
               <div className="mt-2">

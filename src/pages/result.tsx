@@ -75,12 +75,12 @@ export default function Result() {
                     <div className="w-full border border-gray-200 md:mt-0 mt-1"></div>
                     <div className="h-[55%] w-full flex 
                     items-center justify-between md:mt-0">
-                        <div className="md:h-[70%] h-6/12 rounded-2xl bg-[#11f01134] flex items-center w-5/12">
+                        <div className="md:h-[70%] h-7/12 rounded-2xl bg-[#11f01134] flex items-center w-5/12">
                            <div className="md:h-[100%] flex items-center ml-5 font-bold text-green-800 md:text-lg  w-full">
                             Rank :- {}
                            </div>
                         </div>
-                        <div className="md:h-[70%] h-6/12 rounded-2xl bg-[#ffff0060] flex items-center w-5/12">
+                        <div className="md:h-[70%] h-7/12 rounded-2xl bg-[#ffff0060] flex items-center w-5/12">
                            <div className="md:h-[100%] items-center flex md:ml-5 ml-4 font-bold text-amber-800 md:text-lg text-sm w-full">
                             CGPA :-  <span className="font-light ml-2">{studentData.cgpa}</span>
                            </div>

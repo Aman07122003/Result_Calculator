@@ -6,7 +6,8 @@ import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Registration from "./components/Registeration";
-import Loader from "./components/loader";
+import Result from "./pages/result";
+
 
 const App = () => {
   return (
@@ -23,7 +24,7 @@ const App = () => {
           }
         />
         <Route path="/search" element={<Registration />} />  {/* ✅ Search Page */}
-        <Route path="/result/:rollNumber" element={<Loader />} />  {/* ✅ Result Page */}
+        <Route path="/result/:rollNumber" element={<Result />} />  {/* ✅ Result Page */}
       </Routes>
     </AuthProvider>
   );
