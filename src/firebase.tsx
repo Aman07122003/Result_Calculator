@@ -18,7 +18,7 @@ export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 
-// ✅ Load JSON Data & Upload to Firestore
+// ✅ Load JSON Data & Upload to Firestor
 async function uploadData() {
   try {
     const response = await fetch('/results.json');
