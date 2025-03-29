@@ -73,7 +73,7 @@ const Admin: React.FC = () => {
         break;
       case 'semester':
         if (isNaN(numericValue)) error = 'Invalid semester';
-        else if (numericValue < 1 || numericValue > 5) error = 'Semester must be 1-5';
+        else if (numericValue < 1 || numericValue > 8) error = 'Semester must be 1-8';
         break;
     }
     return error;
