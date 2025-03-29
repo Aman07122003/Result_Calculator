@@ -291,7 +291,7 @@ const Admin: React.FC = () => {
                 required
               >
                 <option value=''>Select Semester</option>
-                {[1, 2, 3, 4, 5].map(num => (
+                {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
                   <option key={num} value={num}>Semester {num}</option>
                 ))}
               </select>
