@@ -1,71 +1,221 @@
+import { useEffect, useState } from "react";
 import BarChart from "../components/BarChart";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { app } from "../firebase";
+import { useParams } from "react-router-dom";
+
+interface Subject {
+  code: string;
+  name: string;
+  semester: string;
+  pointer: number;
+  sessional_marks: number;
+  semester_marks: number;
+  total_marks: number;
+  grade: number;
+  total_grade: string;
+}
+
+interface StudentData {
+  semester: string;
+  name: string;
+  cgpa: number;
+  rank?: number;
+  subjects: Subject[];
+}
 
 const Compare = () => {
+  const { originalRollNumber, compareRollNumber } = useParams<{
+    originalRollNumber: string;
+    compareRollNumber: string;
+  }>();
+  
+  const [students, setStudents] = useState<[StudentData?, StudentData?]>([undefined, undefined]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchStudentData = async (rollNumber: string): Promise<StudentData | null> => {
+      const db = getFirestore(app);
+      const docRef = doc(db, "semester", rollNumber);
+      const docSnap = await getDoc(docRef);
+      
+      if (!docSnap.exists()) return null;
+      
+      const data = docSnap.data();
+      return {
+        name: data.name,
+        cgpa: data.cgpa,
+        rank: data.rank || undefined, // Optional rank field
+        semester: data.semester,
+        subjects: data.subjects.map((subject: any) => ({
+          code: subject.code,
+          name: subject.name,
+          pointer: subject.pointer,
+          sessional_marks: subject.sessional_marks,
+          semester_marks: subject.semester_marks,
+          total_marks: subject.total_marks,
+          grade: subject.grade,
+          total_grade: subject.total_grade
+        }))
+      };
+    };
+
+    const fetchData = async () => {
+      try {
+        if (!originalRollNumber || !compareRollNumber) {
+          setError("Missing roll numbers for comparison");
+          return;
+        }
+        
+        const [student1, student2] = await Promise.all([
+          fetchStudentData(originalRollNumber),
+          fetchStudentData(compareRollNumber)
+        ]);
+
+        if (!student1 || !student2) {
+          setError("One or both students not found");
+          return;
+        }
+
+        setStudents([student1, student2]);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError("Failed to fetch student data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [originalRollNumber, compareRollNumber]);
+
+  // Calculate total credits (sum of pointers)
+  const calculateTotalCredits = (subjects: Subject[]) => {
+    return subjects.reduce((sum, subject) => sum + subject.pointer, 0);
+  };
+
+  // Calculate average marks across all subjects
+  const calculateAverageMarks = (subjects: Subject[]) => {
+    const total = subjects.reduce((sum, subject) => sum + subject.total_marks, 0);
+    return (total / subjects.length).toFixed(1);
+  };
+
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="animate-pulse text-xl text-gray-600">Loading comparison data...</div>
+    </div>
+  );
+
+  if (error) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-red-500 text-xl p-4 border border-red-200 bg-red-50 rounded-lg">
+        {error}
+      </div>
+    </div>
+  );
+
+  if (!students[0] || !students[1]) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-gray-600 text-xl">No student data available</div>
+    </div>
+  );
+
+  const [firstStudent, secondStudent] = students;
+
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-gray-100 to-gray-300 flex items-center justify-center p-4">
       <div className="h-full md:h-[95vh] w-full max-w-7xl bg-white rounded-2xl shadow-2xl flex flex-col">
-        {/* Header with Glassmorphism Effect */}
+        {/* Header */}
         <div className="p-6 bg-white/80 backdrop-blur-sm border-b border-gray-200">
           <div className="flex flex-col md:flex-row items-center justify-between">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2 md:mb-0">
-              <span className="text-blue-600">Aman</span>
+            <h1 className="md:text-xl text-sm font-bold text-gray-800 mb-2 md:mb-0">
+              <span className="text-blue-600">{firstStudent.name}</span>
               <span className="mx-3 text-gray-400">vs</span>
-              <span className="text-pink-600">Stuti</span>
+              <span className="text-pink-600">{secondStudent.name}</span>
             </h1>
+            {/* Legend */}
             <div className="flex items-center space-x-4">
               <div className="flex items-center">
                 <div className="w-3 h-3 rounded-full bg-blue-600 mr-2"></div>
-                <span className="text-sm text-gray-600">Aman's Marks</span>
+                <span className="text-sm text-gray-600">{firstStudent.name}'s Marks</span>
               </div>
               <div className="flex items-center">
                 <div className="w-3 h-3 rounded-full bg-pink-600 mr-2"></div>
-                <span className="text-sm text-gray-600">Stuti's Marks</span>
+                <span className="text-sm text-gray-600">{secondStudent.name}'s Marks</span>
               </div>
             </div>
           </div>
+          <h2 className="text-xl text-gray-500">
+            Semester :- {firstStudent.semester}
+          </h2>
           <p className="text-center md:text-left text-gray-500 mt-2 text-sm">
             Academic Performance Comparison Dashboard
           </p>
         </div>
 
         {/* Chart Section */}
-          <div className="flex-1 p-4 md:p-6 overflow-hidden">
-            <div className="h-full w-full rounded-xl border border-gray-100 bg-white shadow-sm p-2 md:p-4">
-              <div className="h-full w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                <div className="md:min-w-[600px] min-w-[1000px] h-full"> 
-                  <BarChart />
-                </div>
+        <div className="flex-1 p-4 md:p-6 overflow-hidden">
+          <div className="h-full w-full rounded-xl border border-gray-100 bg-white shadow-sm p-2 md:p-4">
+            <div className="h-full w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+              <div className="md:min-w-[600px] min-w-[1000px] h-full"> 
+                <BarChart />
               </div>
             </div>
           </div>
+        </div>
 
         {/* Stats Footer */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6 border-t border-gray-100 bg-gray-50/50">
-          {/* Rank Comparison Card */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 border-t border-gray-100 bg-gray-50/50">
+          {/* Average Marks */}
           <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-100">
-            <h3 className="text-sm font-semibold text-gray-500 mb-2">Rank Comparison</h3>
+            <h3 className="text-sm font-semibold text-gray-500 mb-2">Average Marks</h3>
             <div className="flex justify-between items-center">
-              <span className="text-blue-600 font-bold text-2xl">1</span>
-              <span className="text-pink-600 font-bold text-2xl">5</span>
+              <span className="text-blue-600 font-bold text-2xl">
+                {calculateAverageMarks(firstStudent.subjects)}%
+              </span>
+              <span className="text-pink-600 font-bold text-2xl">
+                {calculateAverageMarks(secondStudent.subjects)}%
+              </span>
             </div>
           </div>
 
-          {/* CGPA Comparison Card */}
+          {/* CGPA Comparison */}
           <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-100">
             <h3 className="text-sm font-semibold text-gray-500 mb-2">CGPA Comparison</h3>
             <div className="flex justify-between items-center">
-              <span className="text-blue-600 font-bold text-2xl">8.7</span>
-              <span className="text-pink-600 font-bold text-2xl">8.2</span>
+              <span className="text-blue-600 font-bold text-2xl">
+                {firstStudent.cgpa.toFixed(1)}
+              </span>
+              <span className="text-pink-600 font-bold text-2xl">
+                {secondStudent.cgpa.toFixed(1)}
+              </span>
             </div>
           </div>
 
-          {/* Total Credits Card */}
+          {/* Total Credits */}
           <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-100">
             <h3 className="text-sm font-semibold text-gray-500 mb-2">Total Credits</h3>
             <div className="flex justify-between items-center">
-              <span className="text-blue-600 font-bold text-2xl">160</span>
-              <span className="text-pink-600 font-bold text-2xl">155</span>
+              <span className="text-blue-600 font-bold text-2xl">
+                {calculateTotalCredits(firstStudent.subjects)}
+              </span>
+              <span className="text-pink-600 font-bold text-2xl">
+                {calculateTotalCredits(secondStudent.subjects)}
+              </span>
+            </div>
+          </div>
+
+          {/* Rank Comparison */}
+          <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+            <h3 className="text-sm font-semibold text-gray-500 mb-2">Rank Comparison</h3>
+            <div className="flex justify-between items-center">
+              <span className="text-blue-600 font-bold text-2xl">
+                {firstStudent.rank ? firstStudent.rank : 'N/A'}
+              </span>
+              <span className="text-pink-600 font-bold text-2xl">
+                {secondStudent.rank ? secondStudent.rank : 'N/A'}
+              </span>
             </div>
           </div>
         </div>

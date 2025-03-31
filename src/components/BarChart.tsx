@@ -129,7 +129,7 @@ const BarChart: React.FC = () => {
           const subject = firstStudent.subjects.find(s => s.name === subjectName);
           return subject?.total_marks ?? 0;
         }),
-        backgroundColor: "rgba(75, 192, 192, 0.6)",
+        backgroundColor: "#2563EB",
       },
       {
         label: secondStudent.name,
@@ -137,7 +137,7 @@ const BarChart: React.FC = () => {
           const subject = secondStudent.subjects.find(s => s.name === subjectName);
           return subject?.total_marks ?? 0;
         }),
-        backgroundColor: "rgba(200, 1, 200, 1)",
+        backgroundColor: "#DB2777",
       },
     ],
   };
