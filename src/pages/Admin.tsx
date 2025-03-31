@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, collection, getDocs,  writeBatch } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, getDocs, writeBatch } from 'firebase/firestore';
 import { db } from '../firebase';
 import React, { useEffect, useState } from 'react';
 
@@ -12,10 +12,19 @@ interface Subject {
 }
 
 interface FormData {
+  Year: string;
   name: string;
   rollNumber: string;
   semester: string;
   subjects: Subject[];
+}
+
+interface StudentData {
+  Year: string;
+  cgpa: number;
+  subjects: Subject[];
+  id: string;
+  // Add other properties if needed
 }
 
 const Admin: React.FC = () => {
@@ -23,6 +32,7 @@ const Admin: React.FC = () => {
     name: '',
     rollNumber: '',
     semester: '',
+    Year: '',
     subjects: [{
       code: '', name: '', sessionalMarks: '', semesterMarks: '', 
       credit: '', grade: ''
@@ -33,47 +43,82 @@ const Admin: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    const fetchSemesterTemplate = async () => {
-      if (formData.semester) {
-        const semesterRef = doc(db, 'semesterTemplates', `semester-${formData.semester}`);
-        const docSnap = await getDoc(semesterRef);
-
-        if (docSnap.exists()) {
-          const template = docSnap.data().subjects;
-          setFormData(prev => ({
-            ...prev,
-            subjects: template.map((subject: Subject) => ({
+    const fetchTemplate = async () => {
+      // Only fetch when both values are present
+      if (!formData.Year || !formData.semester) return;
+  
+      try {
+        // Create a map for subject merging
+        const subjectsMap = new Map<string, Subject>();
+        
+      
+  
+        // 2. Fetch Semester Template (with Year context)
+        const semesterRef = doc(db, "semesterTemplates", 
+          `${formData.Year}-semester-${formData.semester}`);
+        const semesterSnap = await getDoc(semesterRef);
+  
+        if (semesterSnap.exists()) {
+          const semesterSubjects = semesterSnap.data().subjects || [];
+          semesterSubjects.forEach((subject: Subject) => {
+            subjectsMap.set(subject.code, { 
               ...subject,
-              sessionalMarks: '',
-              semesterMarks: ''
-            }))
-          }));
+              sessionalMarks: "",
+              semesterMarks: ""
+            });
+          });
         }
+  
+        // Convert map back to array
+        const mergedSubjects = Array.from(subjectsMap.values());
+  
+        // Update state only if subjects changed
+        setFormData(prev => {
+          const currentCodes = prev.subjects.map(s => s.code).join(',');
+          const newCodes = mergedSubjects.map(s => s.code).join(',');
+          
+          return currentCodes === newCodes ? prev : {
+            ...prev,
+            subjects: mergedSubjects
+          };
+        });
+  
+      } catch (error) {
+        console.error("Error fetching templates:", error);
       }
     };
-    fetchSemesterTemplate();
-  }, [formData.semester]);
+  
+    fetchTemplate();
+  }, [formData.Year, formData.semester]);
+  
+  
 
   const validateField = (name: string, value: string) => {
-    const numericValue = parseInt(value);
     let error = '';
     
     switch (name) {
       case 'sessionalMarks':
-        if (isNaN(numericValue)) error = 'Invalid marks';
-        else if (numericValue < 0 || numericValue > 50) error = 'Marks must be 0-50';
+        const sessional = parseInt(value);
+        if (isNaN(sessional)) error = 'Invalid marks';
+        else if (sessional < 0 || sessional > 50) error = 'Marks must be 0-50';
         break;
       case 'semesterMarks':
-        if (isNaN(numericValue)) error = 'Invalid marks';
-        else if (numericValue < 0 || numericValue > 100) error = 'Marks must be 0-100';
+        const semester = parseInt(value);
+        if (isNaN(semester)) error = 'Invalid marks';
+        else if (semester < 0 || semester > 100) error = 'Marks must be 0-100';
         break;
       case 'credit':
-        if (isNaN(numericValue)) error = 'Invalid credit';
-        else if (numericValue < 0) error = 'Credit cannot be negative';
+        const credit = parseInt(value);
+        if (isNaN(credit)) error = 'Invalid credit';
+        else if (credit < 0) error = 'Credit cannot be negative';
         break;
       case 'semester':
-        if (isNaN(numericValue)) error = 'Invalid semester';
-        else if (numericValue < 1 || numericValue > 8) error = 'Semester must be 1-8';
+        const semesterNum = parseInt(value);
+        if (isNaN(semesterNum)) error = 'Invalid semester';
+        else if (semesterNum < 1 || semesterNum > 8) error = 'Semester must be 1-8';
+        break;
+      case 'Year':
+        if (!value) error = 'Year is required';
         break;
     }
     return error;
@@ -113,7 +158,7 @@ const Admin: React.FC = () => {
       ...formData,
       subjects: [...formData.subjects, {
         code: '', name: '', sessionalMarks: '', semesterMarks: '',
-        credit: '', grade: ''
+        credit: '', grade: '', 
       }],
     });
   };
@@ -123,81 +168,95 @@ const Admin: React.FC = () => {
     setFormData({ ...formData, subjects: updatedSubjects });
   };
 
-  const calculateCGPA = () => {
+  const calculateCGPA = (year: string) => { // Add proper typing
     let totalGradePoints = 0;
     let totalCredits = 0;
-
+  
     formData.subjects.forEach(subject => {
       const sessional = parseInt(subject.sessionalMarks) || 0;
       const semester = parseInt(subject.semesterMarks) || 0;
       const total = sessional + semester;
       const credit = parseInt(subject.credit) || 0;
-
+  
       let grade = 0;
-      if (total >= 90) grade = 10;
-      else if (total >= 80) grade = 9;
-      else if (total >= 70) grade = 8;
-      else if (total >= 60) grade = 7;
-      else if (total >= 50) grade = 6;
-      else if (total >= 40) grade = 5;
-
+      
+      // Unified grading system with year-specific thresholds
+      const thresholds = {
+        "2022-2026": { 
+          ranges: [90, 80, 70, 60, 50, 40],
+          grades: [10, 9, 8, 7, 6, 5]
+        },
+        "2021-2025": {
+          ranges: [135, 120, 105, 90, 75, 60],
+          grades: [10, 9, 8, 7, 6, 5]
+        }
+      };
+  
+      const { ranges, grades } = thresholds[year as keyof typeof thresholds] || { ranges: [], grades: [] };
+  
+      for (let i = 0; i < ranges.length; i++) {
+        if (total >= ranges[i]) {
+          grade = grades[i];
+          break;
+        }
+      }
+  
       totalGradePoints += grade * credit;
       totalCredits += credit;
     });
-
-    return totalCredits > 0 ? totalGradePoints / totalCredits : 0;
+  
+    return totalCredits > 0 ? Number((totalGradePoints / totalCredits).toFixed(2)) : 0;
   };
 
   const calculateRank = async (studentId: string) => {
     try {
-      const studentsRef = collection(db, 'student');
+      const studentsRef = collection(db, 'students'); // Consistent collection name
       const snapshot = await getDocs(studentsRef);
-      const students = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        cgpa: doc.data().cgpa || 0,
-        subjects: doc.data().subjects || []
+      
+      const students = await Promise.all(snapshot.docs.map(async docSnapshot => {
+        const data = docSnapshot.data();
+        return {
+          id: docSnapshot.id,
+          Year: data.Year || '', // Add proper fallback
+          cgpa: calculateCGPA(data.Year || ''),
+          subjects: data.subjects || []
+        } as StudentData; // Type assertion
       }));
-
-      // Calculate 4-credit grade points for all students
+  
+      // Calculate grade points with proper typing
       const studentsWithPoints = students.map(student => ({
         ...student,
         gradePoints: student.subjects
           .filter((subj: { credit: string; }) => parseInt(subj.credit) === 4)
-          .reduce((acc: number, subj: { sessionalMarks: string; semesterMarks: string; }) => {
-            const total = parseInt(subj.sessionalMarks) + parseInt(subj.semesterMarks);
-            let grade = 0;
-            if (total >= 90) grade = 10;
-            else if (total >= 80) grade = 9;
-            else if (total >= 70) grade = 8;
-            else if (total >= 60) grade = 7;
-            else if (total >= 50) grade = 6;
-            else if (total >= 40) grade = 5;
+          .reduce((acc: number, _subj: any) => {
+            // Use the student's own year for calculation
+            const grade = calculateCGPA(student.Year); 
             return acc + (grade * 4);
           }, 0)
       }));
-
-      // Sort students
+  
+      // Improved sorting logic
       studentsWithPoints.sort((a, b) => {
-        if (b.cgpa !== a.cgpa) return b.cgpa - a.cgpa;
+        const cgpaDiff = b.cgpa - a.cgpa;
+        if (cgpaDiff !== 0) return cgpaDiff;
         return b.gradePoints - a.gradePoints;
       });
-
-      // Update ranks using batch
+  
+      // Batch update with error handling
       const batch = writeBatch(db);
       studentsWithPoints.forEach((student, index) => {
-        const rank = index + 1;
-        const studentRef = doc(db, 'student', student.id);
-        batch.update(studentRef, { rank });
+        const studentRef = doc(db, 'students', student.id);
+        batch.update(studentRef, { rank: index + 1 });
       });
+      
       await batch.commit();
-
-      // Return current student's rank
-      const currentStudent = studentsWithPoints.find(s => s.id === studentId);
-      return currentStudent ? studentsWithPoints.indexOf(currentStudent) + 1 : null;
+  
+      // Find current student's rank
+      return studentsWithPoints.findIndex(s => s.id === studentId) + 1 || null;
+  
     } catch (error) {
-      console.error('Error calculating rank:', error);
-      return null;
+      console.error('Rank calculation error:', error);
+      throw new Error('Failed to calculate ranks');
     }
   };
 
@@ -206,11 +265,11 @@ const Admin: React.FC = () => {
     if (Object.keys(errors).length > 0) return;
 
     try {
-      const cgpaValue = calculateCGPA();
+      const cgpaValue = calculateCGPA(formData.Year);
       setCGPA(cgpaValue);
 
       // Save student document
-      const studentRef = doc(collection(db, 'student'));
+      const studentRef = doc(collection(db, 'students'));
       await setDoc(studentRef, {
         ...formData,
         cgpa: cgpaValue,
@@ -220,13 +279,29 @@ const Admin: React.FC = () => {
       // Calculate and update ranks
       await calculateRank(studentRef.id);
 
-      // Save semester template if needed
-      const semesterRef = doc(db, 'semesterTemplates', `semester-${formData.semester}`);
-      const docSnap = await getDoc(semesterRef);
+      // Save templates if they don't exist
+      const semesterRef = doc(db, 'semesterTemplates', 
+        `${formData.Year}-semester-${formData.semester}`);
+      const yearRef = doc(db, 'YearTemplates', `Year-${formData.Year}`);
       
-      if (!docSnap.exists()) {
+      const [semesterSnap, yearSnap] = await Promise.all([
+        getDoc(semesterRef),
+        getDoc(yearRef)
+      ]);
+
+      if (!semesterSnap.exists()) {
         await setDoc(semesterRef, {
+          Year: formData.Year,
           semester: formData.semester,
+          subjects: formData.subjects.map(({ code, name, credit, grade }) => ({
+            code, name, credit, grade
+          }))
+        });
+      }
+
+      if (!yearSnap.exists()) {
+        await setDoc(yearRef, {
+          Year: formData.Year,
           subjects: formData.subjects.map(({ code, name, credit, grade }) => ({
             code, name, credit, grade
           }))
@@ -238,6 +313,7 @@ const Admin: React.FC = () => {
         name: '',
         rollNumber: '',
         semester: '',
+        Year: '',
         subjects: [{
           code: '', name: '', sessionalMarks: '', semesterMarks: '',
           credit: '', grade: ''
@@ -296,6 +372,26 @@ const Admin: React.FC = () => {
                 ))}
               </select>
               {errors.semester && <span className='text-red-500 text-sm'>{errors.semester}</span>}
+            </div>
+
+            <div>
+              <label className='block text-sm font-medium text-gray-700'>Year</label>
+              <select
+                name="Year"
+                value={formData.Year}
+                onChange={handleChange}
+                className="mt-1 p-2 w-full rounded border border-amber-500"
+                required
+              >
+                <option value="">Select Year</option>
+                {["2022-2026", "2021-2025"].map((num) => (
+                  <option key={num} value={num}>
+                    Year {num}
+                  </option>
+                ))}
+              </select>
+
+              {errors.Year && <span className='text-red-500 text-sm'>{errors.Year}</span>}
             </div>
           </div>
 

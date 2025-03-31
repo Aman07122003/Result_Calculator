@@ -1,5 +1,4 @@
 import { Route, Routes } from "react-router-dom";
-
 import { AuthProvider } from "./context/AuthContext";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -7,7 +6,7 @@ import Admin from "./pages/Admin";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Registration from "./components/Registeration";
 import Result from "./pages/result";
-
+import Compare from "./pages/Compare";
 
 const App = () => {
   return (
@@ -23,8 +22,13 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/search" element={<Registration />} />  {/* ✅ Search Page */}
-        <Route path="/result/:rollNumber" element={<Result />} />  {/* ✅ Result Page */}
+        <Route path="/search" element={<Registration />} />
+        <Route path="/result/:rollNumber" element={<Result />} />
+        {/* Updated compare route with proper parameters */}
+        <Route 
+          path="/compare/:originalRollNumber/:compareRollNumber" 
+          element={<Compare />} 
+        />
       </Routes>
     </AuthProvider>
   );
