@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, collection, getDocs, writeBatch } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, getDocs, writeBatch, } from 'firebase/firestore';
 import { db } from '../firebase';
 import React, { useEffect, useState } from 'react';
 
@@ -21,9 +21,11 @@ interface FormData {
 
 interface StudentData {
   Year: string;
+  semester: string;
   cgpa: number;
   subjects: Subject[];
-  id: string;
+  name: string;
+  rollNumber: string;
   // Add other properties if needed
 }
 
@@ -44,50 +46,29 @@ const Admin: React.FC = () => {
 
   useEffect(() => {
     const fetchTemplate = async () => {
-      // Only fetch when both values are present
       if (!formData.Year || !formData.semester) return;
-  
+
       try {
-        // Create a map for subject merging
-        const subjectsMap = new Map<string, Subject>();
-        
-      
-  
-        // 2. Fetch Semester Template (with Year context)
-        const semesterRef = doc(db, "semesterTemplates", 
-          `${formData.Year}-semester-${formData.semester}`);
+        const semesterRef = doc(db, 
+          `Years/${formData.Year}/semesters/${formData.semester}`);
         const semesterSnap = await getDoc(semesterRef);
-  
+
         if (semesterSnap.exists()) {
-          const semesterSubjects = semesterSnap.data().subjects || [];
-          semesterSubjects.forEach((subject: Subject) => {
-            subjectsMap.set(subject.code, { 
+          const semesterData = semesterSnap.data();
+          setFormData(prev => ({
+            ...prev,
+            subjects: semesterData.subjects.map((subject: Subject) => ({
               ...subject,
               sessionalMarks: "",
               semesterMarks: ""
-            });
-          });
+            }))
+          }));
         }
-  
-        // Convert map back to array
-        const mergedSubjects = Array.from(subjectsMap.values());
-  
-        // Update state only if subjects changed
-        setFormData(prev => {
-          const currentCodes = prev.subjects.map(s => s.code).join(',');
-          const newCodes = mergedSubjects.map(s => s.code).join(',');
-          
-          return currentCodes === newCodes ? prev : {
-            ...prev,
-            subjects: mergedSubjects
-          };
-        });
-  
       } catch (error) {
-        console.error("Error fetching templates:", error);
+        console.error("Error fetching semester template:", error);
       }
     };
-  
+
     fetchTemplate();
   }, [formData.Year, formData.semester]);
   
@@ -208,52 +189,32 @@ const Admin: React.FC = () => {
     return totalCredits > 0 ? Number((totalGradePoints / totalCredits).toFixed(2)) : 0;
   };
 
-  const calculateRank = async (studentId: string) => {
+  const calculateRank = async (year: string, semester: string) => {
     try {
-      const studentsRef = collection(db, 'students'); // Consistent collection name
+      const studentsRef = collection(db, 
+        `Years/${year}/semesters/${semester}/students`);
       const snapshot = await getDocs(studentsRef);
       
-      const students = await Promise.all(snapshot.docs.map(async docSnapshot => {
-        const data = docSnapshot.data();
-        return {
-          id: docSnapshot.id,
-          Year: data.Year || '', // Add proper fallback
-          cgpa: calculateCGPA(data.Year || ''),
-          subjects: data.subjects || []
-        } as StudentData; // Type assertion
-      }));
-  
-      // Calculate grade points with proper typing
-      const studentsWithPoints = students.map(student => ({
-        ...student,
-        gradePoints: student.subjects
-          .filter((subj: { credit: string; }) => parseInt(subj.credit) === 4)
-          .reduce((acc: number, _subj: any) => {
-            // Use the student's own year for calculation
-            const grade = calculateCGPA(student.Year); 
-            return acc + (grade * 4);
-          }, 0)
-      }));
-  
-      // Improved sorting logic
-      studentsWithPoints.sort((a, b) => {
-        const cgpaDiff = b.cgpa - a.cgpa;
-        if (cgpaDiff !== 0) return cgpaDiff;
-        return b.gradePoints - a.gradePoints;
-      });
-  
-      // Batch update with error handling
+      const students = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as unknown as StudentData[];
+
+      // Sort students by CGPA descending
+      const sortedStudents = [...students].sort((a, b) => b.cgpa - a.cgpa);
+
+      // Update ranks in batch
       const batch = writeBatch(db);
-      studentsWithPoints.forEach((student, index) => {
-        const studentRef = doc(db, 'students', student.id);
+      sortedStudents.forEach((student, index) => {
+        const studentRef = doc(db, 
+          `Years/${year}/semesters/${semester}/students/${student.rollNumber}`);
         batch.update(studentRef, { rank: index + 1 });
       });
       
       await batch.commit();
-  
-      // Find current student's rank
-      return studentsWithPoints.findIndex(s => s.id === studentId) + 1 || null;
-  
+
+      return sortedStudents.findIndex(s => s.rollNumber === formData.rollNumber) + 1;
+
     } catch (error) {
       console.error('Rank calculation error:', error);
       throw new Error('Failed to calculate ranks');
@@ -269,46 +230,44 @@ const Admin: React.FC = () => {
       setCGPA(cgpaValue);
 
       // Save student document
-      const studentRef = doc(collection(db, 'students'));
+      const studentPath = `Years/${formData.Year}/semesters/${formData.semester}/students/${formData.rollNumber}`;
+      const studentRef = doc(db, studentPath);
+
+      // Check if student already exists
+      const studentSnap = await getDoc(studentRef);
+      if (studentSnap.exists()) {
+        alert('Student with this roll number already exists in this semester!');
+        return;
+      }
+
+      // Create student document
       await setDoc(studentRef, {
         ...formData,
         cgpa: cgpaValue,
         timestamp: new Date(),
       });
 
-      // Calculate and update ranks
-      await calculateRank(studentRef.id);
-
-      // Save templates if they don't exist
-      const semesterRef = doc(db, 'semesterTemplates', 
-        `${formData.Year}-semester-${formData.semester}`);
-      const yearRef = doc(db, 'YearTemplates', `Year-${formData.Year}`);
-      
-      const [semesterSnap, yearSnap] = await Promise.all([
-        getDoc(semesterRef),
-        getDoc(yearRef)
-      ]);
+      // Create/update semester template
+      const semesterRef = doc(db, 
+        `Years/${formData.Year}/semesters/${formData.semester}`);
+      const semesterSnap = await getDoc(semesterRef);
 
       if (!semesterSnap.exists()) {
         await setDoc(semesterRef, {
-          Year: formData.Year,
+          subjects: formData.subjects.map(({ code, name, credit, grade }) => ({
+            code, name, credit, grade
+          })),
           semester: formData.semester,
-          subjects: formData.subjects.map(({ code, name, credit, grade }) => ({
-            code, name, credit, grade
-          }))
+          Year: formData.Year
         });
       }
 
-      if (!yearSnap.exists()) {
-        await setDoc(yearRef, {
-          Year: formData.Year,
-          subjects: formData.subjects.map(({ code, name, credit, grade }) => ({
-            code, name, credit, grade
-          }))
-        });
-      }
 
-      alert('Result saved successfully');
+      // Calculate and update rank
+      const rank = await calculateRank(formData.Year, formData.semester);
+      await setDoc(studentRef, { rank }, { merge: true });
+
+      alert('Result saved successfully!');
       setFormData({
         name: '',
         rollNumber: '',
@@ -320,9 +279,10 @@ const Admin: React.FC = () => {
         }],
       });
       setCGPA(null);
+
     } catch (error) {
       console.error('Error saving result:', error);
-      alert('Error saving result');
+      alert('Error saving result. Please check console for details.');
     }
   };
 

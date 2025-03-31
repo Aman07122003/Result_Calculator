@@ -9,7 +9,7 @@ const Grades: React.FC<GradesProps> = ({ studentData, rollNumber }) => {
   // Debugging: Check the full structure
   console.log("Student Data:", studentData);
 
-  const student = studentData.roll_number === rollNumber ? studentData : null;
+  const student = studentData.rollNumber === rollNumber ? studentData : null;
 
 
 console.log(student);

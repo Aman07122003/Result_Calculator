@@ -23,7 +23,7 @@ const App = () => {
           }
         />
         <Route path="/search" element={<Registration />} />
-        <Route path="/result/:rollNumber" element={<Result />} />
+        <Route path="/result/:year/:semester/:rollNumber" element={<Result />} />
         {/* Updated compare route with proper parameters */}
         <Route 
           path="/compare/:originalRollNumber/:compareRollNumber" 
