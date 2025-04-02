@@ -7,20 +7,24 @@ import { useParams } from "react-router-dom";
 interface Subject {
   code: string;
   name: string;
-  semester: string;
-  pointer: number;
-  sessional_marks: number;
-  semester_marks: number;
-  total_marks: number;
-  grade: number;
-  total_grade: string;
+  sessionalMarks: number;
+  semesterMarks: number;
+  credit: number;
+  grade: string;
+  pointers: number;
+  totalGrade: number;
+  totalMarks: number;
 }
 
 interface StudentData {
+  Year: string;
   semester: string;
   name: string;
+  rollNumber: number;
   cgpa: number;
   rank?: number;
+  totalCredit: number;
+  totalGrade: number;
   subjects: Subject[];
 }
 
@@ -29,36 +33,48 @@ const Compare = () => {
     originalRollNumber: string;
     compareRollNumber: string;
   }>();
-  
+
   const [students, setStudents] = useState<[StudentData?, StudentData?]>([undefined, undefined]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [year, setYear] = useState("2022-2026"); // Default year or get from URL
+  const [semester, setSemester] = useState("1"); // Default semester or get from URL
 
   useEffect(() => {
     const fetchStudentData = async (rollNumber: string): Promise<StudentData | null> => {
       const db = getFirestore(app);
-      const docRef = doc(db, "semester", rollNumber);
-      const docSnap = await getDoc(docRef);
+      const docRef = doc(db, `Years/${year}/semesters/${semester}/students/${rollNumber}`);
       
-      if (!docSnap.exists()) return null;
-      
-      const data = docSnap.data();
-      return {
-        name: data.name,
-        cgpa: data.cgpa,
-        rank: data.rank || undefined, // Optional rank field
-        semester: data.semester,
-        subjects: data.subjects.map((subject: any) => ({
-          code: subject.code,
-          name: subject.name,
-          pointer: subject.pointer,
-          sessional_marks: subject.sessional_marks,
-          semester_marks: subject.semester_marks,
-          total_marks: subject.total_marks,
-          grade: subject.grade,
-          total_grade: subject.total_grade
-        }))
-      };
+      try {
+        const docSnap = await getDoc(docRef);
+        if (!docSnap.exists()) return null;
+
+        const data = docSnap.data();
+        return {
+          name: data.name,
+          rollNumber: data.rollNumber,
+          cgpa: data.cgpa,
+          rank: data.rank || undefined,
+          semester: data.semester,
+          Year: data.Year,
+          totalCredit: data.totalCredit,
+          totalGrade: data.totalGrade,
+          subjects: data.subjects.map((subject: any) => ({
+            code: subject.code,
+            name: subject.name,
+            sessionalMarks: subject.sessionalMarks,
+            semesterMarks: subject.semesterMarks,
+            totalMarks: subject.totalMarks,
+            credit: subject.credit,
+            grade: subject.grade,
+            pointers: subject.pointers,
+            totalGrade: subject.totalGrade
+          }))
+        };
+      } catch (error) {
+        console.error("Error fetching student data:", error);
+        return null;
+      }
     };
 
     const fetchData = async () => {
@@ -67,7 +83,7 @@ const Compare = () => {
           setError("Missing roll numbers for comparison");
           return;
         }
-        
+
         const [student1, student2] = await Promise.all([
           fetchStudentData(originalRollNumber),
           fetchStudentData(compareRollNumber)
@@ -78,6 +94,15 @@ const Compare = () => {
           return;
         }
 
+        // Verify both students are from same semester and year
+        if (student1.semester !== student2.semester || student1.Year !== student2.Year) {
+          setError("Students are from different academic periods");
+          return;
+        }
+
+        // Update context with actual year and semester
+        setYear(student1.Year);
+        setSemester(student1.semester);
         setStudents([student1, student2]);
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -88,18 +113,17 @@ const Compare = () => {
     };
 
     fetchData();
-  }, [originalRollNumber, compareRollNumber]);
-
-  // Calculate total credits (sum of pointers)
-  const calculateTotalCredits = (subjects: Subject[]) => {
-    return subjects.reduce((sum, subject) => sum + subject.pointer, 0);
-  };
+  }, [originalRollNumber, compareRollNumber, year, semester]);
 
   // Calculate average marks across all subjects
   const calculateAverageMarks = (subjects: Subject[]) => {
-    const total = subjects.reduce((sum, subject) => sum + subject.total_marks, 0);
+    const total = subjects.reduce((sum, subject) => sum + subject.totalMarks, 0);
     return (total / subjects.length).toFixed(1);
   };
+
+  // Rest of your component remains the same, just update these displays:
+  // Change total_marks to totalMarks in the BarChart component props
+  // Change pointer to pointers if needed
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
@@ -147,7 +171,7 @@ const Compare = () => {
             </div>
           </div>
           <h2 className="text-xl text-gray-500">
-            Semester :- {firstStudent.semester}
+            {firstStudent.Year} - Semester {firstStudent.semester}
           </h2>
           <p className="text-center md:text-left text-gray-500 mt-2 text-sm">
             Academic Performance Comparison Dashboard
@@ -159,7 +183,9 @@ const Compare = () => {
           <div className="h-full w-full rounded-xl border border-gray-100 bg-white shadow-sm p-2 md:p-4">
             <div className="h-full w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
               <div className="md:min-w-[600px] min-w-[1000px] h-full"> 
-                <BarChart />
+                <BarChart
+                  firstStudentSubjects={firstStudent.subjects}
+                  secondStudentSubjects={secondStudent.subjects} firstStudentName={""} secondStudentName={""}                />
               </div>
             </div>
           </div>
@@ -198,10 +224,10 @@ const Compare = () => {
             <h3 className="text-sm font-semibold text-gray-500 mb-2">Total Credits</h3>
             <div className="flex justify-between items-center">
               <span className="text-blue-600 font-bold text-2xl">
-                {calculateTotalCredits(firstStudent.subjects)}
+                {firstStudent.totalCredit}
               </span>
               <span className="text-pink-600 font-bold text-2xl">
-                {calculateTotalCredits(secondStudent.subjects)}
+                {secondStudent.totalCredit}
               </span>
             </div>
           </div>

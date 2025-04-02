@@ -44,10 +44,10 @@ console.log(student);
               <td className="py-1 px-2 border-b text-center">{subject.name}</td>
               <td className="py-1 px-2 border-b text-center">{subject.sessionalMarks}</td>
               <td className="py-1 px-2 border-b text-center">{subject.semesterMarks}</td>
-              <td className="py-1 px-2 border-b text-center">{subject.total_marks}</td>
+              <td className="py-1 px-2 border-b text-center">{subject.totalMarks}</td>
               <td className="py-1 px-2 border-b text-center">{subject.credit}</td>
-              <td className="py-1 px-2 border-b text-center">{subject.grade}</td>
-              <td className="py-1 px-2 border-b text-center">{subject.total_grade}</td>
+              <td className="py-1 px-2 border-b text-center">{subject.pointers}</td>
+              <td className="py-1 px-2 border-b text-center">{subject.totalGrade}</td>
             </tr>
           ))}
         </tbody>
