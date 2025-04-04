@@ -38,86 +38,78 @@ export default function Registration() {
     };
 
     return (
-        <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-            <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-                <img
-                    alt="Your Company"
-                    src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-                    className="mx-auto h-10 w-auto"
-                />
-                <h2 className="mt-5 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
-                    Check your Result
-                </h2>
-            </div>
+        <div className="relative w-[100%] max-w-md bg-gray-800/30 rounded-2xl shadow-2xl border border-gray-700/30 p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Year Selection */}
+                <div className="space-y-2">
+                    <label htmlFor="year" className="block md:text-lg font-medium text-gray-300">
+                        Academic Year
+                    </label>
+                    <select
+                        id="year"
+                        value={year}
+                        onChange={(e) => setYear(e.target.value)}
+                        className="w-full text-gray-500 px-4 py-2.5 bg-gray-700/30 border border-gray-600/30 rounded-lg focus:ring-2 focus:ring-indigo-400 transition-all"
+                        required
+                    >
+                        <option value="">Select Year</option>
+                        <option value="2022-2026">2022-2026</option>
+                        <option value="2021-2025">2021-2025</option>
+                    </select>
+                </div>
 
-            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-sm">
-                <form onSubmit={handleSubmit} className="w-full flex flex-col py-4 space-y-4">
-                    {/* Year Selection */}
-                    <div>
-                        <label htmlFor="year" className="block text-sm/6 md:text-[17px] font-medium text-gray-900">
-                            Academic Year
-                        </label>
-                        <select
-                            id="year"
-                            value={year}
-                            onChange={(e) => setYear(e.target.value)}
-                            className="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 outline-offset-1 outline-gray-300 focus:outline-2 focus:outline-offset-2 focus:outline-black sm:text-sm/6"
-                            required
-                        >
-                            <option value="">Select Year</option>
-                            <option value="2022-2026">2022-2026</option>
-                            <option value="2021-2025">2021-2025</option>
-                        </select>
+                {/* Semester Selection */}
+                <div className="space-y-2">
+                    <label htmlFor="semester" className="block md:text-lg font-medium text-gray-300">
+                        Semester
+                    </label>
+                    <select
+                        id="semester"
+                        value={semester}
+                        onChange={(e) => setSemester(e.target.value)}
+                        className="w-full text-gray-500 p-4 py-2.5 bg-gray-700/30 border border-gray-600/30 rounded-lg focus:ring-2 focus:ring-indigo-400 transition-all"
+                        required
+                    >
+                        <option value=""><p>Select Semester</p></option>
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
+                            <option key={num} value={num}>Semester {num}</option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Roll Number Input */}
+                <div className="space-y-2">
+                    <label htmlFor="rollNumber" className="block text-lg font-medium text-gray-300">
+                        Roll Number
+                    </label>
+                    <input
+                        value={rollNumber}
+                        onChange={(e) => setRollNumber(e.target.value)}
+                        id="rollNumber"
+                        name="rollNumber"
+                        type="text"
+                        required
+                        autoComplete="off"
+                        className="w-full px-4 py-2.5 bg-gray-700/30 border border-gray-500/30 text-gray-400 rounded-lg focus:ring-2 focus:ring-indigo-400 transition-all placeholder-gray-500"
+                        placeholder="Enter your roll number"
+                    />
+                </div>
+
+                {/* Error Message */}
+                {error && (
+                    <div className="p-3 bg-red-900/30 text-red-300 text-sm rounded-lg border border-red-800/50">
+                        {error}
                     </div>
+                )}
 
-                    {/* Semester Selection */}
-                    <div>
-                        <label htmlFor="semester" className="block text-sm/6 md:text-[17px] font-medium text-gray-900">
-                            Semester
-                        </label>
-                        <select
-                            id="semester"
-                            value={semester}
-                            onChange={(e) => setSemester(e.target.value)}
-                            className="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 outline-offset-1 outline-gray-300 focus:outline-2 focus:outline-offset-2 focus:outline-black sm:text-sm/6"
-                            required
-                        >
-                            <option value="">Select Semester</option>
-                            {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
-                                <option key={num} value={num}>Semester {num}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Roll Number Input */}
-                    <div>
-                        <label htmlFor="rollNumber" className="block text-sm/6 md:text-[17px] font-medium text-gray-900">
-                            Roll Number
-                        </label>
-                        <input
-                            value={rollNumber}
-                            onChange={(e) => setRollNumber(e.target.value)}
-                            id="rollNumber"
-                            name="rollNumber"
-                            type="text"
-                            required
-                            autoComplete="off"
-                            className="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 focus:outline-black sm:text-sm/6"
-                        />
-                    </div>
-
-                    {error && <p className="text-sm text-red-600">{error}</p>}
-
-                    <div>
-                        <button
-                            type="submit"
-                            className="flex w-full justify-center rounded-md bg-black px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-gray-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
-                        >
-                            Check Result
-                        </button>
-                    </div>
-                </form>
-            </div>
+                {/* Submit Button */}
+                <button
+                    type="submit"
+                    className="w-full px-6 py-3 bg-gradient-to-r from-green-400 to-indigo-600 text-white font-extrabold md:text-xl rounded-lg hover:shadow-lg transition-all"
+                >
+                    Check Result
+                </button>
+            </form>
         </div>
     );
 }

@@ -55,106 +55,91 @@ export default function Result() {
   if (!studentData) return null;
 
   return (
-    <div className="md:min-h-screen h-[1200px] w-full bg-gray-200 flex items-center justify-center">
-      <div className="min-h-[calc(100vh+20px)] flex items-center justify-center w-[95%] md:w-[55%] bg-white pb-8 pt-8 rounded-2xl shadow-2xl">
-        <div className="h-[97%] w-[91%]">
-          {/* Header Section */}
-          <div className="md:h-[20px] h-[5%] w-full flex items-center justify-center">
-            <h2 className="md:text-4xl text-2xl font-extrabold text-gray-900">Academic Result</h2>
+    <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-2 sm:p-4">
+      <div className="w-full border border-gray-700/50 max-w-4xl bg-gray-800/80 rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden p-2 sm:p-6 backdrop-blur-lg">
+        {/* Header Section - Mobile Adjusted */}
+        <div className="p-4 sm:p-8 text-center rounded-xl sm:rounded-2xl border border-gray-700/30 bg-gradient-to-br from-gray-900/80 to-gray-800/80">
+          <div className="flex justify-center items-center gap-4 ">
+            <span className="text-3xl sm:text-5xl font-black bg-gradient-to-r from-indigo-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
+              Academic
+            </span>
+            <span className="text-3xl sm:text-5xl font-black bg-gradient-to-r from-emerald-400 via-green-400 to-emerald-400 bg-clip-text text-transparent">
+              Result
+            </span>
           </div>
-
-          {/* Personal Information */}
-          <div className="flex md:text-[25px] md:mt-7 mt-4 font-semibold w-full items-center h-[5%] md:h-[8%]">
-            Personal Information
-          </div>
-          <div className="w-full border-[1px] border-gray-100"></div>
-          
-          <div className="md:h-[100px] md:mt-1 md:flex items-center justify-between w-full h-[150px] mt-3 md:flex-row flex-col gap-y-2 md:gap-y-0">
-            {/* Name Card */}
-            <div className="md:h-[70%] h-[25%] md:w-[30%] bg-[#e2f0fd] items-center flex justify-center rounded-2xl">
-              <div className="md:h-[90%] h-[80%] w-[80%] md:flex-col flex gap-x-1">
-                <div className="md:h-[50%] md:w-full md:text-xl text-sm font-bold flex items-center text-blue-800">
-                  Name
+        </div>
+  
+        {/* Personal Information */}
+        <div className="p-2 sm:p-6 space-y-6 mt-3">
+          <div className="space-y-4">
+            <h3 className="text-xl sm:text-3xl font-bold text-gray-300 mb-4 border-l-4 border-indigo-400 pl-3">
+              Student Profile
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Cards - Mobile Optimized */}
+              {[
+                { title: "Name", value: studentData.name, color: "indigo" },
+                { title: "Roll Number", value: rollNumber, color: "emerald" },
+                { title: "Semester", value: semester, color: "amber" }
+              ].map((card, index) => (
+                <div key={index} className={`p-4 sm:p-6 rounded-lg border border-gray-700/30 hover:border-${card.color}-400/30 transition-all`}>
+                  <div className={`text-${card.color}-400/80 text-xs sm:text-sm font-bold mb-2 uppercase tracking-wider`}>
+                    {card.title}
+                  </div>
+                  <div className="text-lg sm:text-2xl font-semibold text-gray-200 truncate">
+                    {card.value}
+                  </div>
                 </div>
-                <div className="md:h-[40%] md:w-full flex items-center text-sm md:text-lg font-sans text-blue-800">
-                  {studentData.name}
-                </div>
-              </div>
-            </div>
-
-            {/* Roll Number Card */}
-            <div className="md:h-[70%] md:w-[30%] h-[25%] md:mt-0 mt-2 bg-[#11f01134] items-center flex justify-center rounded-2xl">
-              <div className="md:h-[90%] w-[80%] flex md:flex-col items-center gap-x-1 md:gap-0">
-                <div className="md:h-[50%] md:w-full md:text-xl text-sm font-bold flex items-center text-green-800">
-                  Roll Number
-                </div>
-                <div className="h-[40%] md:w-full text-sm md:text-lg font-sans text-green-800">
-                  {rollNumber}
-                </div>
-              </div>
-            </div>
-
-            {/* Semester Card */}
-            <div className="md:h-[70%] md:w-[30%] h-[25%] mt-2 bg-[#ffff0060] items-center flex justify-center rounded-2xl">
-              <div className="md:h-[90%] w-[80%] flex md:flex-col items-center gap-x-1 md:gap-0">
-                <div className="md:h-[50%] md:w-full md:text-xl text-sm font-bold flex items-center text-amber-800">
-                  Semester
-                </div>
-                <div className="h-[40%] md:w-full text-sm md:text-lg font-sans text-amber-800">
-                  {semester}
-                </div>
-              </div>
+              ))}
             </div>
           </div>
-
-          {/* Grades Section */}
-          <div className="w-full md:h-[55%]">
-            <div className="h-[30px] md:h-[8%] md:mt-2.5 md:text-[25px] font-semibold">
-              Detailed Subject Grades
+  
+          {/* Grades Section - Mobile Scroll */}
+          <div className="space-y-4">
+            <h3 className="text-xl sm:text-3xl font-bold text-gray-300 mb-4 border-l-4 border-emerald-400 pl-3">
+              Academic Performance
+            </h3>
+            <div className="overflow-x-auto">
+              <Grades studentData={studentData} rollNumber={rollNumber ?? ""} />
             </div>
-            <div className="w-full md:mt-4 border-[1px] border-gray-100"></div>
-            <Grades studentData={studentData} rollNumber={rollNumber ?? ""} />
           </div>
-
-          {/* Result Summary */}
-          <div className="h-[150px] md:h-[150px] w-full md:mt-5 mt-5">
-            <div className="md:text-[25px] md:h-[40%] flex items-center font-semibold">
-              Result Summary
-            </div>
-            <div className="w-full border border-gray-200 md:mt-0 mt-1"></div>
-            <div className="md:h-[55%] md:w-full h-[50%] items-center justify-between md:mt-0 md:flex">
-              <div className="md:h-[70%] h-7/12 rounded-2xl bg-[#11f01134] flex items-center md:w-5/12 md:mt-0 mt-3">
-                <div className="md:h-[100%] flex items-center ml-5 font-bold text-green-800 md:text-lg w-full">
-                  Rank: {studentData.rank || "N/A"}
-                </div>
+  
+          {/* Result Summary - Mobile Stack */}
+          <div className="space-y-4">
+            <h3 className="text-xl sm:text-3xl font-bold text-gray-300 mb-4 border-l-4 border-blue-400 pl-3">
+              Academic Summary
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 sm:p-6 rounded-lg border border-gray-700/30">
+                <div className="text-green-400/80 text-sm sm:text-lg font-bold mb-2">Rank</div>
+                <div className="text-xl sm:text-2xl font-bold text-gray-200">{studentData.rank || "N/A"}</div>
               </div>
-              <div className="md:h-[70%] h-7/12 rounded-2xl bg-[#ffff0060] flex items-center md:w-5/12 md:mt-0 mt-3">
-                <div className="md:h-[100%] items-center flex md:ml-5 ml-4 font-bold text-amber-800 md:text-lg text-sm w-full">
-                  CGPA: <span className="font-light ml-2">{studentData.cgpa?.toFixed(2)}</span>
-                </div>
+              <div className="p-4 sm:p-6 rounded-lg border border-gray-700/30">
+                <div className="text-amber-400/80 text-sm sm:text-lg font-bold mb-2">CGPA</div>
+                <div className="text-xl sm:text-2xl font-bold text-gray-200">{studentData.cgpa?.toFixed(2)}</div>
               </div>
             </div>
           </div>
-
-          {/* Comparison Section */}
-          <div className="h-[15%] mt-2 w-full">
-            <div className="md:text-[25px] md:h-[40%] flex items-center font-semibold">
-              Compare Your Result
-            </div>
-            <div className="w-full md:mt-4 mt-2 border-[1px] border-gray-100"></div>
-            <div className="h-full w-full flex md:flex-row flex-col justify-around items-center">
+  
+          {/* Comparison Section - Mobile Stack */}
+          <div className="space-y-4">
+            <h3 className="text-xl sm:text-3xl font-bold text-gray-300 mb-4 border-l-4 border-purple-400 pl-3">
+              Result Comparison
+            </h3>
+            <div className="flex flex-col gap-3">
               <input
                 type="text"
                 placeholder="Enter Roll Number to Compare"
                 value={compareRollNumber}
                 onChange={(e) => setCompareRollNumber(e.target.value)}
-                className="block w-full md:w-[40%] rounded-md bg-white px-3 py-1.5 text-base mt-5 text-gray-900 outline-1 outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 focus:outline-black sm:text-sm/6"
+                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700/30 rounded-lg text-base text-gray-300 placeholder-gray-500 focus:outline-none focus:border-indigo-400/50"
               />
               <button
                 onClick={handleCompare}
-                className="flex w-full md:w-[40%] justify-center rounded-md bg-black px-3 py-1.5 text-sm/6 font-semibold text-white mt-5 shadow-xs hover:bg-gray-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-indigo-400 to-blue-400 text-gray-900 font-bold rounded-lg hover:from-indigo-300 hover:to-blue-300 transition-all active:scale-95"
               >
-                Compare
+                Compare Now
               </button>
             </div>
           </div>

@@ -6,52 +6,48 @@ interface GradesProps {
 }
 
 const Grades: React.FC<GradesProps> = ({ studentData, rollNumber }) => {
-  // Debugging: Check the full structure
-  console.log("Student Data:", studentData);
-
   const student = studentData.rollNumber === rollNumber ? studentData : null;
 
-
-console.log(student);
-  
-
   if (!student) {
-    return <p className="text-center text-red-500 font-bold">Student not found.</p>;
+    return <p className="text-center text-red-400 text-sm sm:text-base p-3">Student not found</p>;
   }
 
   return (
-    <div className="overflow-x-auto md:mt-5 mt-3">
-      <table className="min-w-full bg-white border border-gray-300 md:text-[18px] text-[12px] ">
-        <thead className="bg-gray-100">
-          <tr className="text-sm md:text-[19px]">
-            <th className="py-1 px-3 border-b">Subject Code</th>
-            <th className="py-1 px-4 border-b">Subject Name</th>
-            <th className="py-1 px-2 border-b">Sessional Marks</th>
-            <th className="py-1 px-2 border-b">Semester Marks</th>
-            <th className="py-1 px-2 border-b">Total Marks</th>
-            <th className="py-1 px-2 border-b">Credit</th>
-            <th className="py-1 px-2 border-b">Pointers</th>
-            <th className="py-1 px-2 border-b">Total Grade</th>
+    <div className="overflow-x-auto rounded-lg border border-gray-700/30 shadow-lg">
+      <table className="min-w-full bg-gray-900/50 backdrop-blur-sm">
+        <thead className="bg-gray-800/80">
+          <tr className="text-gray-400 font-semibold text-xs sm:text-sm md:text-base">
+            <th className="py-2 sm:py-3 px-4 text-left border-b border-gray-700/30">Code</th>
+            <th className="py-2 sm:py-3 px-3 text-left border-b border-gray-700/30">Subject</th>
+            <th className="py-2 sm:py-3 px-2 sm:px-3 text-center border-b border-gray-700/30">Sessional</th>
+            <th className="py-2 sm:py-3 px-2 sm:px-3 text-center border-b border-gray-700/30">Semester</th>
+            <th className="py-2 sm:py-3 px-2 sm:px-3 text-center border-b border-gray-700/30">Total</th>
+            <th className="py-2 sm:py-3 px-2 sm:px-3 text-center border-b border-gray-700/30">Credit</th>
+            <th className="py-2 sm:py-3 px-2 sm:px-3 text-center border-b border-gray-700/30">Pointer</th>
+            <th className="py-2 sm:py-3 px-2 sm:px-3 text-center border-b border-gray-700/30">Grade</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="divide-y divide-gray-700/30">
           {student.subjects.map((subject: any, index: number) => (
             <tr 
-                key={index} 
-                className={subject.pointer <= 7 ? "bg-red-500 text-white" : ""}
-              >
-              <td className="py-1 px-2 border-b text-center">{subject.code}</td>
-              <td className="py-1 px-2 border-b text-center">{subject.name}</td>
-              <td className="py-1 px-2 border-b text-center">{subject.sessionalMarks}</td>
-              <td className="py-1 px-2 border-b text-center">{subject.semesterMarks}</td>
-              <td className="py-1 px-2 border-b text-center">{subject.totalMarks}</td>
-              <td className="py-1 px-2 border-b text-center">{subject.credit}</td>
-              <td className="py-1 px-2 border-b text-center">{subject.pointer}</td>
-              <td className="py-1 px-2 border-b text-center">{subject.totalPointer}</td>
+              key={index}
+              className={`hover:bg-gray-800/30 transition-colors ${
+                subject.pointer <= 7 ? " text-red-400 font-bold"  : "text-gray-300"
+              } md:text text-sm`}
+            >
+              <td className="py-2 sm:py-3 px-2 sm:px-3 font-mono">{subject.code}</td>
+              <td className="py-2 sm:py-3 px-2 sm:px-3 max-w-[100px] sm:max-w-none truncate hover:text-clip">
+                {subject.name}
+              </td>
+              <td className="py-2 sm:py-3 px-2 sm:px-3 text-center">{subject.sessionalMarks}</td>
+              <td className="py-2 sm:py-3 px-2 sm:px-3 text-center">{subject.semesterMarks}</td>
+              <td className="py-2 sm:py-3 px-2 sm:px-3 text-center font-medium">{subject.totalMarks}</td>
+              <td className="py-2 sm:py-3 px-2 sm:px-3 text-center">{subject.credit}</td>
+              <td className="py-2 sm:py-3 px-2 sm:px-3 text-center font-semibold">{subject.pointer}</td>
+              <td className="py-2 sm:py-3 px-2 sm:px-3 text-center font-bold">{subject.totalPointer}</td>
             </tr>
           ))}
         </tbody>
-
       </table>
     </div>
   );

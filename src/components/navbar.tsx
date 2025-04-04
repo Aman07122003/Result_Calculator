@@ -1,30 +1,23 @@
 import { Link } from 'react-router-dom';
 
-const Navbar = ({ toggleTheme, isDarkMode }: { toggleTheme: () => void; isDarkMode: boolean }) => {
+const Navbar = () => {
   return (
-    <div className="h-[10vh] w-full flex justify-between bg-gray-200 dark:bg-gray-900 transition-colors duration-300">
-      <div className="h-full ml-3 md:ml-0 md:w-3/12 w-[45%] flex items-center justify-center text-2xl md:text-4xl font-bold font-mono text-gray-800 dark:text-white">
-        Result Management
+    <nav className="h-14 md:h-16 w-full px-4 md:px-6 flex items-center justify-between backdrop-blur-lg bg-gray-900/80 border-b border-gray-700/30 fixed top-0 z-50">
+      <div className="flex items-center">
+        <span className="text-2xl md:text-4xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
+          ResultHub
+        </span>
       </div>
-      <div className="h-full md:w-3/12 w-[50%] flex items-center justify-center md:text-xl text-sm md:font-bold font-mono">
-        <Link to='/login' className="hover:text-black delay-75 text-gray-400 dark:text-gray-300">
-            Admin_Login
-        </Link>
 
-        {/* Toggle Switch */}
-        <div
-          onClick={toggleTheme}
-          className={`md:w-14 md:h-7 w-11 h-5 flex items-center px-1 bg-gray-700 dark:bg-gray-300 rounded-full cursor-pointer shadow-md md:ml-7 ml-4 transition-all duration-300 ease-in`}
+      <div className="flex items-center space-x-4 md:space-x-6">
+        <Link 
+          to="/login" 
+          className="px-4 mr-4 py-2 bg-gradient-to-r from-green-400 to-indigo-400 text-white text-sm md:text-base font-semibold rounded-lg shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
         >
-          {/* Inner circle */}
-          <div
-            className={`md:w-5 md:h-5 w-4 h-4 bg-amber-200 rounded-full transition-transform duration-300 ${
-              isDarkMode ? 'translate-x-7' : 'translate-x-0'
-            }`}
-          ></div>
-        </div>
+          Admin Login
+        </Link>
       </div>
-    </div>
+    </nav>
   );
 };
 
