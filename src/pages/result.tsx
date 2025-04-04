@@ -22,6 +22,8 @@ export default function Result() {
     navigate(`/compare/${year}/${semester}/${rollNumber}/${compareRollNumber}`);
   };
 
+  
+  
   useEffect(() => {
     const fetchResult = async () => {
       try {
@@ -80,14 +82,14 @@ export default function Result() {
               {/* Cards - Mobile Optimized */}
               {[
                 { title: "Name", value: studentData.name, color: "indigo" },
-                { title: "Roll Number", value: rollNumber, color: "emerald" },
+                { title: "Roll Number", value: rollNumber, color: "green" },
                 { title: "Semester", value: semester, color: "amber" }
               ].map((card, index) => (
                 <div key={index} className={`p-4 sm:p-6 rounded-lg border border-gray-700/30 hover:border-${card.color}-400/30 transition-all`}>
-                  <div className={`text-${card.color}-400/80 text-xs sm:text-sm font-bold mb-2 uppercase tracking-wider`}>
+                  <div className={`text-${card.color}-400 text-xs sm:text-sm font-bold mb-2 uppercase tracking-wider`}>
                     {card.title}
                   </div>
-                  <div className="text-lg sm:text-2xl font-semibold text-gray-200 truncate">
+                  <div className="text-lg sm:text-2xl font-semibold text-white truncate">
                     {card.value}
                   </div>
                 </div>
