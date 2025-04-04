@@ -35,8 +35,8 @@ const Grades: React.FC<GradesProps> = ({ studentData, rollNumber }) => {
                 subject.pointer <= 7 ? " text-red-400 font-bold"  : "text-gray-300"
               } md:text text-sm`}
             >
-              <td className="py-2 sm:py-3 px-2 sm:px-3 font-mono">{subject.code}</td>
-              <td className="py-2 sm:py-3 px-2 sm:px-3 max-w-[100px] sm:max-w-none truncate hover:text-clip">
+              <td className="py-2 sm:py-3 px-1 font-mono">{subject.code}</td>
+              <td className="py-2 sm:py-3 px-4 sm:px-3 max-w-[100px] sm:max-w-none truncate hover:text-clip">
                 {subject.name}
               </td>
               <td className="py-2 sm:py-3 px-2 sm:px-3 text-center">{subject.sessionalMarks}</td>
