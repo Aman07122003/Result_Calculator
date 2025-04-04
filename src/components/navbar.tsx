@@ -4,7 +4,7 @@ const Navbar = () => {
   return (
     <nav className="h-14 md:h-16 w-full px-4 md:px-6 flex items-center justify-between backdrop-blur-lg bg-gray-900/80 border-b border-gray-700/30 fixed top-0 z-50">
       <div className="flex items-center">
-        <span className="text-2xl md:text-4xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
+        <span className="text-2xl md:text-4xl lg:text-3xl font-bold bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
           ResultHub
         </span>
       </div>
