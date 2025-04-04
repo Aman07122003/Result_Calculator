@@ -324,7 +324,7 @@ const Admin: React.FC = () => {
 
     } catch (error) {
       console.error('Error saving result:', error);
-      alert('Error saving result. Please check console for details.');
+      alert('Error saving result. Please check console for details');
     }
   };
 
