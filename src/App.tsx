@@ -24,11 +24,10 @@ const App = () => {
         />
         <Route path="/search" element={<Registration />} />
         <Route path="/result/:year/:semester/:rollNumber" element={<Result />} />
-        {/* Updated compare route with proper parameters */}
         <Route 
-          path="/compare/:originalRollNumber/:compareRollNumber" 
-          element={<Compare />} 
-        />
+        path="/compare/:year/:semester/:rollNumber1/:rollNumber2" 
+        element={<Compare />} 
+      />
       </Routes>
     </AuthProvider>
   );

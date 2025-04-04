@@ -1,44 +1,23 @@
+// src/pages/Compare.tsx
 import { useEffect, useState } from "react";
 import BarChart from "../components/BarChart";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { app } from "../firebase";
 import { useParams } from "react-router-dom";
-
-interface Subject {
-  code: string;
-  name: string;
-  sessionalMarks: number;
-  semesterMarks: number;
-  credit: number;
-  grade: string;
-  pointers: number;
-  totalGrade: number;
-  totalMarks: number;
-}
-
-interface StudentData {
-  Year: string;
-  semester: string;
-  name: string;
-  rollNumber: number;
-  cgpa: number;
-  rank?: number;
-  totalCredit: number;
-  totalGrade: number;
-  subjects: Subject[];
-}
+import { StudentData, Subject } from "../types"
 
 const Compare = () => {
-  const { originalRollNumber, compareRollNumber } = useParams<{
-    originalRollNumber: string;
-    compareRollNumber: string;
+  const { year, semester, rollNumber1, rollNumber2 } = useParams<{
+    year: string;
+    semester: string;
+    rollNumber1: string;
+    rollNumber2: string;
   }>();
+
 
   const [students, setStudents] = useState<[StudentData?, StudentData?]>([undefined, undefined]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [year, setYear] = useState("2022-2026"); // Default year or get from URL
-  const [semester, setSemester] = useState("1"); // Default semester or get from URL
 
   useEffect(() => {
     const fetchStudentData = async (rollNumber: string): Promise<StudentData | null> => {
@@ -58,7 +37,7 @@ const Compare = () => {
           semester: data.semester,
           Year: data.Year,
           totalCredit: data.totalCredit,
-          totalGrade: data.totalGrade,
+          totalPointer: data.totalPointer,
           subjects: data.subjects.map((subject: any) => ({
             code: subject.code,
             name: subject.name,
@@ -66,9 +45,9 @@ const Compare = () => {
             semesterMarks: subject.semesterMarks,
             totalMarks: subject.totalMarks,
             credit: subject.credit,
-            grade: subject.grade,
-            pointers: subject.pointers,
-            totalGrade: subject.totalGrade
+            pointer: subject.pointer || subject.pointers || 0,
+            totalPointer: subject.totalPointer,
+            grade: subject.grade
           }))
         };
       } catch (error) {
@@ -79,14 +58,14 @@ const Compare = () => {
 
     const fetchData = async () => {
       try {
-        if (!originalRollNumber || !compareRollNumber) {
-          setError("Missing roll numbers for comparison");
+        if (!rollNumber1 || !rollNumber2 || !year || !semester) {
+          setError("Missing required parameters for comparison");
           return;
         }
 
         const [student1, student2] = await Promise.all([
-          fetchStudentData(originalRollNumber),
-          fetchStudentData(compareRollNumber)
+          fetchStudentData(rollNumber1),
+          fetchStudentData(rollNumber2)
         ]);
 
         if (!student1 || !student2) {
@@ -94,15 +73,11 @@ const Compare = () => {
           return;
         }
 
-        // Verify both students are from same semester and year
         if (student1.semester !== student2.semester || student1.Year !== student2.Year) {
           setError("Students are from different academic periods");
           return;
         }
 
-        // Update context with actual year and semester
-        setYear(student1.Year);
-        setSemester(student1.semester);
         setStudents([student1, student2]);
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -113,141 +88,120 @@ const Compare = () => {
     };
 
     fetchData();
-  }, [originalRollNumber, compareRollNumber, year, semester]);
+  }, [rollNumber1, rollNumber2, year, semester]);
 
-  // Calculate average marks across all subjects
   const calculateAverageMarks = (subjects: Subject[]) => {
+    if (!subjects || subjects.length === 0) return 0;
     const total = subjects.reduce((sum, subject) => sum + subject.totalMarks, 0);
     return (total / subjects.length).toFixed(1);
   };
 
-  // Rest of your component remains the same, just update these displays:
-  // Change total_marks to totalMarks in the BarChart component props
-  // Change pointer to pointers if needed
-
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-pulse text-xl text-gray-600">Loading comparison data...</div>
-    </div>
-  );
-
-  if (error) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-red-500 text-xl p-4 border border-red-200 bg-red-50 rounded-lg">
-        {error}
-      </div>
-    </div>
-  );
-
-  if (!students[0] || !students[1]) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-gray-600 text-xl">No student data available</div>
-    </div>
-  );
+  if (loading) return <div className="loading-spinner">Loading...</div>;
+  if (error) return <div className="error-message">{error}</div>;
+  if (!students[0] || !students[1]) return <div>No student data available</div>;
 
   const [firstStudent, secondStudent] = students;
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-100 to-gray-300 flex items-center justify-center p-4">
-      <div className="h-full md:h-[95vh] w-full max-w-7xl bg-white rounded-2xl shadow-2xl flex flex-col">
-        {/* Header */}
-        <div className="p-6 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <h1 className="md:text-xl text-sm font-bold text-gray-800 mb-2 md:mb-0">
-              <span className="text-blue-600">{firstStudent.name}</span>
-              <span className="mx-3 text-gray-400">vs</span>
-              <span className="text-pink-600">{secondStudent.name}</span>
-            </h1>
-            {/* Legend */}
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center">
-                <div className="w-3 h-3 rounded-full bg-blue-600 mr-2"></div>
-                <span className="text-sm text-gray-600">{firstStudent.name}'s Marks</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-3 h-3 rounded-full bg-pink-600 mr-2"></div>
-                <span className="text-sm text-gray-600">{secondStudent.name}'s Marks</span>
-              </div>
-            </div>
-          </div>
-          <h2 className="text-xl text-gray-500">
-            {firstStudent.Year} - Semester {firstStudent.semester}
-          </h2>
-          <p className="text-center md:text-left text-gray-500 mt-2 text-sm">
-            Academic Performance Comparison Dashboard
+    <div className="min-h-screen pb-20 bg-gradient-to-br from-gray-900 to-gray-800 px-4 py-8 md:px-12">
+      {/* Header */}
+      <div className="text-center md:h-[20%] mb-12 space-y-1">
+        <div className="inline-block" >
+          <div className="flex justify-center bg-gray-800 px-6 py-2 rounded-full shadow-sm mb-4 border border-gray-700">
+          <p className="text-sm text-gray-400 font-medium">
+            {firstStudent.Year} • Semester {firstStudent.semester}
           </p>
-        </div>
-
-        {/* Chart Section */}
-        <div className="flex-1 p-4 md:p-6 overflow-hidden">
-          <div className="h-full w-full rounded-xl border border-gray-100 bg-white shadow-sm p-2 md:p-4">
-            <div className="h-full w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-              <div className="md:min-w-[600px] min-w-[1000px] h-full"> 
-                <BarChart
-                  firstStudentSubjects={firstStudent.subjects}
-                  secondStudentSubjects={secondStudent.subjects} firstStudentName={""} secondStudentName={""}                />
-              </div>
-            </div>
           </div>
         </div>
-
-        {/* Stats Footer */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 border-t border-gray-100 bg-gray-50/50">
-          {/* Average Marks */}
-          <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-100">
-            <h3 className="text-sm font-semibold text-gray-500 mb-2">Average Marks</h3>
-            <div className="flex justify-between items-center">
-              <span className="text-blue-600 font-bold text-2xl">
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-100 text-center md:flex md:justify-center">
+          <div className="bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">
+            {firstStudent.name}
+          </div>
+          <div className="mx-3 text-gray-500">vs</div>
+          <div className="bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent">
+            {secondStudent.name}
+          </div>
+      </h1>
+      </div>
+  
+      {/* Chart Section */}
+      <div className="bg-gray-800 min-h-[400px] p-6 rounded-3xl shadow-lg mb-10 border border-gray-700 overflow-x-auto">
+  <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 min-w-[600px]">
+    <h2 className="text-xl font-semibold text-gray-200">Performance Comparison</h2>
+    <div className="flex gap-4 justify-center">
+      <div className="flex items-center gap-2">
+        <div className="w-3 h-3 bg-indigo-400 rounded-full"></div>
+        <span className="text-sm text-gray-400">{firstStudent.name}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="w-3 h-3 bg-emerald-400 rounded-full"></div>
+        <span className="text-sm text-gray-400">{secondStudent.name}</span>
+      </div>
+    </div>
+  </div>
+  <div className="min-w-[600px]">
+    <BarChart
+      firstStudentSubjects={firstStudent.subjects}
+      secondStudentSubjects={secondStudent.subjects}
+      firstStudentName={firstStudent.name}
+      secondStudentName={secondStudent.name}
+    />
+  </div>
+</div>
+      {/* Stats Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Average Marks Card */}
+        <div className="bg-gray-800 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-700">
+          <div className="mb-6 text-center">
+            <h3 className="text-lg font-semibold text-gray-200 relative pb-2">
+              Average Marks
+              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-gradient-to-r from-indigo-400 to-emerald-400 rounded-full"></div>
+            </h3>
+          </div>
+          <div className="flex justify-around">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-indigo-400 mb-1">
                 {calculateAverageMarks(firstStudent.subjects)}%
-              </span>
-              <span className="text-pink-600 font-bold text-2xl">
+              </div>
+              <div className="text-sm text-gray-400">{firstStudent.name}</div>
+            </div>
+            <div className="h-12 w-px bg-gray-700 my-auto"></div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-emerald-400 mb-1">
                 {calculateAverageMarks(secondStudent.subjects)}%
-              </span>
+              </div>
+              <div className="text-sm text-gray-400">{secondStudent.name}</div>
             </div>
           </div>
-
-          {/* CGPA Comparison */}
-          <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-100">
-            <h3 className="text-sm font-semibold text-gray-500 mb-2">CGPA Comparison</h3>
-            <div className="flex justify-between items-center">
-              <span className="text-blue-600 font-bold text-2xl">
-                {firstStudent.cgpa.toFixed(1)}
-              </span>
-              <span className="text-pink-600 font-bold text-2xl">
-                {secondStudent.cgpa.toFixed(1)}
-              </span>
-            </div>
+        </div>
+  
+        {/* CGPA Card */}
+        <div className="bg-gray-800 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-700">
+          <div className="mb-6 text-center">
+            <h3 className="text-lg font-semibold text-gray-200 relative pb-2">
+              CGPA Comparison
+              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-gradient-to-r from-indigo-400 to-emerald-400 rounded-full"></div>
+            </h3>
           </div>
-
-          {/* Total Credits */}
-          <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-100">
-            <h3 className="text-sm font-semibold text-gray-500 mb-2">Total Credits</h3>
-            <div className="flex justify-between items-center">
-              <span className="text-blue-600 font-bold text-2xl">
-                {firstStudent.totalCredit}
-              </span>
-              <span className="text-pink-600 font-bold text-2xl">
-                {secondStudent.totalCredit}
-              </span>
+          <div className="flex justify-around">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-indigo-400 mb-1">
+                {firstStudent.cgpa}
+              </div>
+              <div className="text-sm text-gray-400">{firstStudent.name}</div>
             </div>
-          </div>
-
-          {/* Rank Comparison */}
-          <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-100">
-            <h3 className="text-sm font-semibold text-gray-500 mb-2">Rank Comparison</h3>
-            <div className="flex justify-between items-center">
-              <span className="text-blue-600 font-bold text-2xl">
-                {firstStudent.rank ? firstStudent.rank : 'N/A'}
-              </span>
-              <span className="text-pink-600 font-bold text-2xl">
-                {secondStudent.rank ? secondStudent.rank : 'N/A'}
-              </span>
+            <div className="h-12 w-px bg-gray-700 my-auto"></div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-emerald-400 mb-1">
+                {secondStudent.cgpa}
+              </div>
+              <div className="text-sm text-gray-400">{secondStudent.name}</div>
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-};
+}
 
 export default Compare;

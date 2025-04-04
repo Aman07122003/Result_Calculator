@@ -11,20 +11,10 @@ import {
   ChartOptions,
   ChartData,
 } from "chart.js";
+import { Subject } from "../types";
 
 // Register required Chart.js components
 ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
-
-interface Subject {
-  code: string;
-  name: string;
-  sessionalMarks: number;
-  semesterMarks: number;
-  totalMarks: number;
-  pointers: number;
-  grade: string;
-  totalGrade: number;
-}
 
 interface BarChartProps {
   firstStudentSubjects: Subject[];
@@ -56,7 +46,9 @@ const BarChart: React.FC<BarChartProps> = ({
           const subject = firstStudentSubjects.find((s) => s.name === subjectName);
           return subject?.totalMarks ?? 0;
         }),
-        backgroundColor: "#2563EB",
+        backgroundColor: "rgba(129, 140, 248, 0.8)",
+        borderColor: "rgba(129, 140, 248, 1)",
+        borderWidth: 1,
       },
       {
         label: secondStudentName,
@@ -64,7 +56,9 @@ const BarChart: React.FC<BarChartProps> = ({
           const subject = secondStudentSubjects.find((s) => s.name === subjectName);
           return subject?.totalMarks ?? 0;
         }),
-        backgroundColor: "#DB2777",
+        backgroundColor: "rgba(52, 211, 153, 0.8)",
+        borderColor: "rgba(52, 211, 153, 0.8)",
+        borderWidth: 1,
       },
     ],
   };
@@ -79,6 +73,12 @@ const BarChart: React.FC<BarChartProps> = ({
         title: {
           display: true,
           text: "Total Marks (out of 100)",
+          font: {
+            weight: "bold",
+          },
+        },
+        grid: {
+          color: "rgba(0, 0, 0, 0.05)",
         },
       },
       x: {
@@ -86,16 +86,37 @@ const BarChart: React.FC<BarChartProps> = ({
           autoSkip: false,
           maxRotation: 45,
           minRotation: 45,
+          font: {
+            size: 12,
+          },
+        },
+        grid: {
+          display: false,
         },
       },
     },
     plugins: {
       legend: {
         position: "top",
+        labels: {
+          font: {
+            size: 16,
+            weight: "bold",
+          },
+          padding: 20,
+          usePointStyle: true,
+        },
       },
       title: {
         display: true,
         text: "Subject-wise Marks Comparison",
+        font: {
+          size: 24,
+          weight: "bold",
+        },
+        padding: {
+          bottom: 0,
+        },
       },
       tooltip: {
         callbacks: {
@@ -109,19 +130,58 @@ const BarChart: React.FC<BarChartProps> = ({
             return [
               `Student: ${studentIndex === 0 ? firstStudentName : secondStudentName}`,
               `Code: ${subject?.code ?? "N/A"}`,
-              `Sessional: ${subject?.sessionalMarks ?? 0}`,
-              `Semester: ${subject?.semesterMarks ?? 0}`,
-              `Total: ${context.raw}`,
+              `Sessional: ${subject?.sessionalMarks ?? 0}/50`,
+              `Semester: ${subject?.semesterMarks ?? 0}/100`,
+              `Total: ${context.raw}/150`,
+              `Pointer: ${subject?.pointer ?? 0}`,
+              `Grade: ${subject?.grade ?? "N/A"}`,
             ];
           },
+          footer: (context) => {
+            const subjectName = context[0].label;
+            const subject1 = firstStudentSubjects.find((s) => s.name === subjectName);
+            const subject2 = secondStudentSubjects.find((s) => s.name === subjectName);
+            const difference = (subject1?.totalMarks ?? 0) - (subject2?.totalMarks ?? 0);
+            
+            if (Math.abs(difference) > 0) {
+              return [
+                `Difference: ${Math.abs(difference)} points`,
+                difference > 0 
+                  ? `${firstStudentName} leads by ${difference}`
+                  : `${secondStudentName} leads by ${Math.abs(difference)}`
+              ];
+            }
+            return ["Scores are equal"];
+          },
         },
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        titleFont: {
+          size: 14,
+          weight: "bold",
+        },
+        bodyFont: {
+          size: 11,
+        },
+        padding: 12,
+        displayColors: true,
+        usePointStyle: true,
       },
+    },
+    animation: {
+      duration: 1000,
+      easing: "easeInOutQuad",
     },
   };
 
   return (
-    <div className="h-full w-full">
-      <Bar data={chartData} options={options} />
+    <div className="h-full w-full p-4">
+      <div className="rounded-lg shadow-md p-4 h-full">
+        <Bar 
+          data={chartData} 
+          options={options} 
+          height={400}
+        />
+      </div>
     </div>
   );
 };
