@@ -38,7 +38,7 @@ console.log(student);
           {student.subjects.map((subject: any, index: number) => (
             <tr 
                 key={index} 
-                className={subject.grade <= 7 ? "bg-red-500 text-white" : ""}
+                className={subject.pointer <= 7 ? "bg-red-500 text-white" : ""}
               >
               <td className="py-1 px-2 border-b text-center">{subject.code}</td>
               <td className="py-1 px-2 border-b text-center">{subject.name}</td>
@@ -46,8 +46,8 @@ console.log(student);
               <td className="py-1 px-2 border-b text-center">{subject.semesterMarks}</td>
               <td className="py-1 px-2 border-b text-center">{subject.totalMarks}</td>
               <td className="py-1 px-2 border-b text-center">{subject.credit}</td>
-              <td className="py-1 px-2 border-b text-center">{subject.pointers}</td>
-              <td className="py-1 px-2 border-b text-center">{subject.totalGrade}</td>
+              <td className="py-1 px-2 border-b text-center">{subject.pointer}</td>
+              <td className="py-1 px-2 border-b text-center">{subject.totalPointer}</td>
             </tr>
           ))}
         </tbody>

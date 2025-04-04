@@ -8,9 +8,8 @@ interface Subject {
   sessionalMarks: number;
   semesterMarks: number;
   credit: number;
-  grade: string;
-  pointers: number;
-  totalGrade: number;
+  pointer: number;
+  totalPointer: number;
   totalMarks: number;
 }
 
@@ -30,8 +29,7 @@ interface StudentData {
   name: string;
   rollNumber: number;
   totalCredit: number;
-  totalGrade: number;
-  // Add other properties if needed
+  totalPointer: number;
 }
 
 const Admin: React.FC = () => {
@@ -42,7 +40,7 @@ const Admin: React.FC = () => {
     Year: '',
     subjects: [{
       code: '', name: '', sessionalMarks: 0, semesterMarks: 0, totalMarks: 0,
-      credit: 0, pointers: 0, grade: '', totalGrade: 0
+      credit: 0, pointer: 0, totalPointer: 0
     }],
   });
 
@@ -66,9 +64,9 @@ const Admin: React.FC = () => {
               sessionalMarks: 0,
               semesterMarks: 0,
               totalMarks: 0,
-              pointers: 0,
-              totalGrade: 0,
-              grade: ''
+              pointer: 0,
+              totalPointer: 0,
+              credit: subject.credit || 0 // Ensure credit is preserved
             }))
           }));
         }
@@ -129,9 +127,7 @@ const Admin: React.FC = () => {
       const updatedSubjects = [...formData.subjects];
       updatedSubjects[index] = { 
         ...updatedSubjects[index], 
-        [field]: field === 'name' || field === 'code' || field === 'grade' 
-          ? value 
-          : parseInt(value) || 0 
+        [field]: field === 'name' || field === 'code' ? value : parseInt(value) 
       };
       setFormData({ ...formData, subjects: updatedSubjects });
     } else {
@@ -150,9 +146,9 @@ const Admin: React.FC = () => {
       ...formData,
       subjects: [...formData.subjects, {
         code: '', name: '', sessionalMarks: 0, semesterMarks: 0,
-        credit: 0, grade: '',
-        pointers: 0,
-        totalGrade: 0,
+        credit: 0,
+        pointer: 0,
+        totalPointer: 0,
         totalMarks: 0
       }],
     });
@@ -167,65 +163,72 @@ const Admin: React.FC = () => {
     const thresholds = {
       "2022-2026": { 
         ranges: [90, 80, 70, 60, 50, 40],
-        grades: [10, 9, 8, 7, 6, 5],
-        gradeLetters: ['A+', 'A', 'B+', 'B', 'C', 'D']
+        pointer: [10, 9, 8, 7, 6, 5],
       },
       "2021-2025": {
         ranges: [135, 120, 105, 90, 75, 60],
-        grades: [10, 9, 8, 7, 6, 5],
-        gradeLetters: ['A+', 'A', 'B+', 'B', 'C', 'D']
+        pointer: [10, 9, 8, 7, 6, 5],
       }
     };
 
-    const { ranges, grades, gradeLetters } = thresholds[year as keyof typeof thresholds] || { 
+    const { ranges, pointer } = thresholds[year as keyof typeof thresholds] || { 
       ranges: [], 
-      grades: [], 
-      gradeLetters: [] 
+      pointer: [],  
     };
 
     for (let i = 0; i < ranges.length; i++) {
       if (totalMarks >= ranges[i]) {
         return {
-          grade: gradeLetters[i],
-          pointers: grades[i]
+          pointer: pointer[i]
         };
       }
     }
 
     return {
-      grade: 'F',
-      pointers: 0
+      pointer: 0
     };
   };
 
   const calculateCGPA = (subjects: Subject[], year: string) => {
-    let totalGradePoints = 0;
+    let totalPointers = 0;
     let totalCredits = 0;
+
+    console.log("Calculating CGPA for subjects:", subjects);
 
     const processedSubjects = subjects.map(subject => {
       const totalMarks = subject.sessionalMarks + subject.semesterMarks;
-      const { grade, pointers } = calculateGradeAndPointers(totalMarks, year);
+      const { pointer } = calculateGradeAndPointers(totalMarks, year);
+      const totalPointer = pointer * Number(subject.credit);
       
+      console.log(`Subject ${subject.code}:`, {
+        marks: totalMarks,
+        pointer,
+        credit: Number(subject.credit),
+        totalPointer
+      });
+
       return {
         ...subject,
         totalMarks,
-        grade,
-        pointers,
-        totalGrade: pointers * subject.credit
+        pointer,
+        totalPointer
       };
     });
 
     processedSubjects.forEach(subject => {
-      totalGradePoints += subject.totalGrade;
-      totalCredits += subject.credit;
+      totalPointers += subject.totalPointer;
+      totalCredits += Number(subject.credit);
     });
 
-    const cgpa = totalCredits > 0 ? Number((totalGradePoints / totalCredits).toFixed(2)) : 0;
+    console.log("Total Pointers:", totalPointers);
+    console.log("Total Credits:", totalCredits);
+
+    const cgpa = totalCredits > 0 ? Number((totalPointers / totalCredits).toFixed(2)) : 0;
 
     return {
       processedSubjects,
       totalCredit: totalCredits,
-      totalGrade: totalGradePoints,
+      totalPointer: totalPointers,
       cgpa
     };
   };
@@ -263,7 +266,7 @@ const Admin: React.FC = () => {
     if (Object.keys(errors).length > 0) return;
 
     try {
-      const { processedSubjects, totalCredit, totalGrade, cgpa } = calculateCGPA(formData.subjects, formData.Year);
+      const { processedSubjects, totalCredit, totalPointer, cgpa } = calculateCGPA(formData.subjects, formData.Year);
       setCGPA(cgpa);
 
       const studentPath = `Years/${formData.Year}/semesters/${formData.semester}/students/${formData.rollNumber}`;
@@ -282,7 +285,7 @@ const Admin: React.FC = () => {
         Year: formData.Year,
         subjects: processedSubjects,
         totalCredit,
-        totalGrade,
+        totalPointer,
         cgpa,
         timestamp: new Date(),
       });
@@ -311,10 +314,10 @@ const Admin: React.FC = () => {
         Year: '',
         subjects: [{
           code: '', name: '', sessionalMarks: 0, semesterMarks: 0,
-          credit: 0, grade: '',
-          pointers: 0,
-          totalGrade: 0,
-          totalMarks: 0
+          credit: 0,
+          pointer: 0,
+          totalPointer: 0,
+          totalMarks: 0,
         }],
       });
       setCGPA(null);
@@ -425,8 +428,6 @@ const Admin: React.FC = () => {
                       value={subject.sessionalMarks}
                       onChange={(e) => handleChange(e, index, 'sessionalMarks')}
                       className='mt-1 p-1 w-full rounded border border-amber-300'
-                      min='0'
-                      max='50'
                       required
                     />
                     {errors[`sessionalMarks-${index}`] && (
@@ -440,8 +441,6 @@ const Admin: React.FC = () => {
                       value={subject.semesterMarks}
                       onChange={(e) => handleChange(e, index, 'semesterMarks')}
                       className='mt-1 p-1 w-full rounded border border-amber-300'
-                      min='0'
-                      max='100'
                       required
                     />
                     {errors[`semesterMarks-${index}`] && (
