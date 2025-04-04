@@ -80,20 +80,30 @@ export default function Result() {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Cards - Mobile Optimized */}
-              {[
-                { title: "Name", value: studentData.name, color: "indigo" },
-                { title: "Roll Number", value: rollNumber, color: "green" },
-                { title: "Semester", value: semester, color: "amber" }
-              ].map((card, index) => (
-                <div key={index} className={`p-4 sm:p-6 rounded-lg border border-gray-700/30 hover:border-${card.color}-400/30 transition-all`}>
-                  <div className={`text-${card.color}-400 text-xs sm:text-sm font-bold mb-2 uppercase tracking-wider`}>
-                    {card.title}
+               <div className="p-4 sm:p-6 rounded-lg border border-gray-700 hover:border-indigo-400 transition-all">
+                  <div className="text-indigo-400 text-xs sm:text-sm font-bold mb-2 uppercase tracking-wider">
+                    Name
                   </div>
                   <div className="text-lg sm:text-2xl font-semibold text-white truncate">
-                    {card.value}
+                    {studentData.name}
                   </div>
                 </div>
-              ))}
+                <div className="p-4 sm:p-6 rounded-lg border border-gray-700 hover:border-green-400 transition-all">
+                  <div className="text-green-400 text-xs sm:text-sm font-bold mb-2 uppercase tracking-wider">
+                    Roll Number
+                  </div>
+                  <div className="text-lg sm:text-2xl font-semibold text-white truncate">
+                    {studentData.rollNumber}
+                  </div>
+                </div>
+                <div className="p-4 sm:p-6 rounded-lg border border-gray-700 hover:border-amber-400 transition-all">
+                  <div className="text-amber-400 text-xs sm:text-sm font-bold mb-2 uppercase tracking-wider">
+                    Semester
+                  </div>
+                  <div className="text-lg sm:text-2xl font-semibold text-white truncate">
+                    {studentData.semester}
+                  </div>
+                </div>
             </div>
           </div>
   
