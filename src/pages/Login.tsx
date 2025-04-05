@@ -31,14 +31,14 @@ const Login: React.FC = () => {
                     <form onSubmit={handleSubmit} className='w-full flex flex-col py-4'>
                         <input
                             onChange={(e) => setEmail(e.target.value)}
-                            className='md:p-3 md:my-6 p-1 my-2 rounded-md border-[1px]'
+                            className='md:p-3 md:my-6 p-1 my-2 text-gray-300 bg-gray-700 bg-gra rounded-md border border-gray-700'
                             type='email'
                             placeholder='Email'
                             autoComplete='email'
                         />
                         <input
                             onChange={(e) => setPassword(e.target.value)}
-                            className='md:p-3 md:my-5 p-1 my-5 rounded-md border border-gray-700'
+                            className='md:p-3 md:my-5 text-gray-300 p-1 my-5 rounded-md bg-gray-700 border border-gray-700'
                             type='password'
                             placeholder='Password'
                             autoComplete='current-password'
