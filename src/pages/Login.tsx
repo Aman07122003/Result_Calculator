@@ -28,22 +28,22 @@ const Login: React.FC = () => {
              <div className='h-[90%] w-[90%]'>
                <h1 className='text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-green-400 to-indigo-600 bg-clip-text text-transparent'>Admin Login</h1>
                     {error ? <p className='p-3 bg-red-400 my-2'>{error}</p> : null}
-                    <form onSubmit={handleSubmit} className='w-full flex flex-col py-4'>
+                    <form onSubmit={handleSubmit} className='w-full mt-5 flex flex-col py-4'>
                         <input
                             onChange={(e) => setEmail(e.target.value)}
-                            className='md:p-3 md:my-6 p-1 my-2 text-gray-300 bg-gray-700 bg-gra rounded-md border border-gray-700'
+                            className='w-full px-4 py-3 bg-gray-900/50 border border-gray-700/30 rounded-lg text-base text-gray-300 placeholder-gray-500 focus:outline-none focus:border-indigo-400/50'
                             type='email'
                             placeholder='Email'
                             autoComplete='email'
                         />
                         <input
                             onChange={(e) => setPassword(e.target.value)}
-                            className='md:p-3 md:my-5 text-gray-300 p-1 my-5 rounded-md bg-gray-700 border border-gray-700'
+                            className='w-full mt-7 px-4 py-3 bg-gray-900/50 border border-gray-700/30 rounded-lg text-base text-gray-300 placeholder-gray-500 focus:outline-none focus:border-indigo-400/50'
                             type='password'
                             placeholder='Password'
                             autoComplete='current-password'
                         />
-                        <button className='w-full px-6 py-3 bg-gradient-to-r from-green-400 to-indigo-600 text-white font-extrabold md:text-xl rounded-lg hover:shadow-lg transition-all'>
+                        <button className='w-full mt-7 px-6 py-3 bg-gradient-to-r from-green-400 to-indigo-600 text-white font-extrabold md:text-xl rounded-lg hover:shadow-lg transition-all'>
                             Login
                         </button>
                     </form>
