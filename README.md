@@ -1,6 +1,6 @@
 # ResultHub
 
-![ResultHub Logo](public/logo.png)
+![ResultHub Logo](public/Loogo.png)
 
 **ResultHub** is a modern web-based platform designed to simplify result checking, comparison, and management for students and administrators.  
 With its user-friendly interface, automated result builder, and interactive visualizations, ResultHub makes academic performance tracking easy, efficient, and engaging.
@@ -34,7 +34,7 @@ Once details are filled, clicking **Check Result** redirects to the **Result Pag
 
 ### 2. Result Page
 Displays the student’s marks and performance in a clean, readable format.  
-![Result Page](public/result.png)
+![Result Page](public/Result.png)
 
 ---
 
